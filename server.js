@@ -2,6 +2,8 @@ const fastify = require('fastify')({
   logger: true,
 });
 
+//fastify.register(require('@fastify/formbody'));
+
 const usuariosRoutes = require('./routes/usuarios');
 fastify.register(usuariosRoutes);
 
