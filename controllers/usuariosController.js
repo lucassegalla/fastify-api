@@ -32,8 +32,44 @@ async function buscarUsuarioPorId(request, reply) {
   return usuario;
 }
 
+async function atualizarUsuario(request, reply) {
+  const id = request.params.id;
+  const dadosAtualizados = request.body;
+
+  const usuarioAtualizado = usuariosService.atualizarUsuario(
+    Number(id),
+    dadosAtualizados,
+  );
+
+  if (!usuarioAtualizado) {
+    reply.code(404);
+
+    return {
+      mensagem: 'usuario não encontrado',
+    };
+  }
+
+  return usuarioAtualizado;
+}
+
+async function removerUsuario(request, reply) {
+  const id = Number(request.params.id);
+
+  const removido = usuariosService.removerUsuario(id);
+
+  if (!removido) {
+    return reply.code(404).send({
+      mensagem: 'Usuario não encontrado',
+    });
+  }
+
+  return reply.code(204).send();
+}
+
 module.exports = {
   listarUsuarios,
   criarUsuario,
   buscarUsuarioPorId,
+  atualizarUsuario,
+  removerUsuario,
 };
