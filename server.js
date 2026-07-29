@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 //habilitar logger
 const fastify = require('fastify')({
   logger: true,
@@ -16,7 +18,7 @@ fastify.get('/', async (request, reply) => {
 const start = async () => {
   try {
     await fastify.listen({
-      port: 3000,
+      port: process.env.PORT,
     });
   } catch (err) {
     fastify.log.error(err);

@@ -1,61 +1,55 @@
 const usuariosService = require('../services/usuariosService');
 
 async function listarUsuarios(request, reply) {
-  const usuarios = usuariosService.listarUsuarios();
+  const usuarios = await usuariosService.listarUsuarios();
 
-  return usuarios;
+  return reply.code(200).sendo(usuarios);
 }
 
 async function criarUsuario(request, reply) {
   const usuario = request.body;
 
-  const novoUsuario = usuariosService.criarUsuario(usuario);
+  const novoUsuario = await usuariosService.criarUsuario(usuario);
 
-  reply.code(201);
-
-  return novoUsuario;
+  return reply.code(201).send(novoUsuario);
 }
 
 async function buscarUsuarioPorId(request, reply) {
   const id = Number(request.params.id);
 
-  const usuario = usuariosService.buscarUsuarioPorId(id);
+  const usuario = await usuariosService.buscarUsuarioPorId(id);
 
   if (!usuario) {
-    reply.code(404);
-
-    return {
-      mensagem: 'usuario nao encontrado',
-    };
+    return reply.code(404).send({
+      mensagem: 'Usuário não encontrado',
+    });
   }
 
-  return usuario;
+  return reply.code(200).send(usuario);
 }
 
 async function atualizarUsuario(request, reply) {
-  const id = request.params.id;
+  const id = Number(request.params.id);
   const dadosAtualizados = request.body;
 
-  const usuarioAtualizado = usuariosService.atualizarUsuario(
-    Number(id),
+  const usuarioAtualizado = await usuariosService.atualizarUsuario(
+    id,
     dadosAtualizados,
   );
 
   if (!usuarioAtualizado) {
-    reply.code(404);
-
-    return {
-      mensagem: 'usuario não encontrado',
-    };
+    return reply.code(404).send({
+      mensagem: 'Usuário não encontrado',
+    });
   }
 
-  return usuarioAtualizado;
+  return reply.code(200).send(usuarioAtualizado);
 }
 
 async function removerUsuario(request, reply) {
   const id = Number(request.params.id);
 
-  const removido = usuariosService.removerUsuario(id);
+  const removido = await usuariosService.removerUsuario(id);
 
   if (!removido) {
     return reply.code(404).send({

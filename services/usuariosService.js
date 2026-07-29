@@ -1,52 +1,61 @@
-const usuarios = require('../data/usuarios');
+const db = require('../database/connection');
 
-//listar usuarios registrados
-function listarUsuarios() {
-  return usuarios;
+async function listarUsuarios() {
+  const resultado = await db.query('SELECT * FROM usuarios');
+  return resultado.rows;
 }
 
-//criar novo usuario
-function criarUsuario(usuario) {
-  const novoUsuario = {
-    id: usuarios.length + 1,
-    ...usuario,
-  };
+async function criarUsuario(usuario) {
+  const resultado = await db.query(
+    `
+      INSERT INTO usuarios (nome, idade)
+      VALUES ($1, $2)
+      RETURNING *;
+    `,
+    [usuario.nome, usuario.idade],
+  );
 
-  usuarios.push(novoUsuario);
-
-  return novoUsuario;
+  return resultado.rows[0];
 }
 
-function buscarUsuarioPorId(id) {
-  return usuarios.find((usuario) => usuario.id === id);
+async function buscarUsuarioPorId(id) {
+  const resultado = await db.query(
+    `
+      SELECT *
+      FROM usuarios
+      WHERE id = $1;
+    `,
+    [id],
+  );
+  return resultado.rows[0];
 }
 
-function atualizarUsuario(id, dadosAtualizados) {
-  const usuario = usuarios.find((usuario) => usuario.id === id);
-
-  if (!usuario) {
-    return null;
-  }
-
-  usuario.nome = dadosAtualizados.nome;
-  usuario.idade = dadosAtualizados.idade;
-
-  return usuario;
+async function atualizarUsuario(id, dadosAtualizados) {
+  const resultado = await db.query(
+    `
+      UPDATE usuarios
+      SET nome = $1,
+          idade = $2
+      WHERE id = $3
+      RETURNING *;
+    `,
+    [dadosAtualizados.nome, dadosAtualizados.idade, id],
+  );
+  return resultado.rows[0];
 }
 
-function removerUsuario(id) {
-  const indice = usuarios.findIndex((usuario) => usuario.id === id);
-
-  if (indice === -1) {
-    return false;
-  }
-
-  usuarios.splice(indice, 1);
-
-  return true;
+async function removerUsuario(id) {
+  const resultado = await db.query(
+    `
+      DELETE FROM usuarios
+      WHERE id = $1
+      RETURNING *;
+    `,
+    [id],
+  );
+  return resultado.rows[0];
 }
 
-//exportar funções
 module.exports = {
   listarUsuarios,
   criarUsuario,

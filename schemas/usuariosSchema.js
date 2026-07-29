@@ -1,3 +1,16 @@
+const usuarioPorIdSchema = {
+  params: {
+    type: 'object',
+    required: ['id'],
+    properties: {
+      id: {
+        type: 'integer',
+        minimum: 1,
+      },
+    },
+  },
+};
+
 const criarUsuarioSchema = {
   body: {
     type: 'object',
@@ -8,56 +21,20 @@ const criarUsuarioSchema = {
         minLength: 3,
       },
       idade: {
-        type: 'number',
-        minimum: 0,
-      },
-    },
-  },
-};
-
-const buscarUsuarioPorIdSchema = {
-  params: {
-    type: 'object',
-    required: ['id'],
-    properties: {
-      id: {
         type: 'integer',
-        minimum: 1,
+        minimum: 0,
       },
     },
   },
 };
 
 const atualizarUsuarioSchema = {
-  params: {
-    type: 'object',
-    required: ['id'],
-    properties: {
-      id: {
-        type: 'integer',
-        minimum: 1,
-      },
-    },
-  },
-
-  body: {
-    type: 'object',
-    required: ['nome', 'idade'],
-    properties: {
-      nome: {
-        type: 'string',
-        minLength: 3,
-      },
-      idade: {
-        type: 'integer',
-        minimum: 0,
-      },
-    },
-  },
+  params: usuarioPorIdSchema.params,
+  body: criarUsuarioSchema.body,
 };
 
 module.exports = {
   criarUsuarioSchema,
-  buscarUsuarioPorIdSchema,
+  usuarioPorIdSchema,
   atualizarUsuarioSchema,
 };
