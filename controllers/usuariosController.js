@@ -3,7 +3,7 @@ const usuariosService = require('../services/usuariosService');
 async function listarUsuarios(request, reply) {
   const usuarios = await usuariosService.listarUsuarios();
 
-  return reply.code(200).sendo(usuarios);
+  return reply.code(200).send(usuarios);
 }
 
 async function criarUsuario(request, reply) {
