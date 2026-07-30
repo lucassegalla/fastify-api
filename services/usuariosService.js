@@ -1,23 +1,15 @@
-const db = require('../database/connection');
+const usuariosRepository = require('../repositories/usuariosRepository');
+const NotFoundError = require('../errors/NotFoundError');
 
 async function listarUsuarios(page, limit) {
   const offset = (page - 1) * limit;
-  const resultado = await db.query(
-    `
-      SELECT * FROM usuarios
-      ORDER BY id
-      LIMIT $1
-      OFFSET $2;
-    `,
-    [limit, offset],
-  );
 
-  const resultadoTotal = await db.query('SELECT COUNT(*) FROM usuarios');
-  const totalUsuarios = Number(resultadoTotal.rows[0].count);
+  const usuarios = await usuariosRepository.listarUsuarios(limit, offset);
+  const totalUsuarios = await usuariosRepository.contarUsuarios();
   const totalPaginas = Math.ceil(totalUsuarios / limit);
 
   return {
-    dados: resultado.rows,
+    dados: usuarios,
     paginacao: {
       paginaAtual: page,
       limite: limit,
@@ -28,54 +20,35 @@ async function listarUsuarios(page, limit) {
 }
 
 async function criarUsuario(usuario) {
-  const resultado = await db.query(
-    `
-      INSERT INTO usuarios (nome, idade)
-      VALUES ($1, $2)
-      RETURNING *;
-    `,
-    [usuario.nome, usuario.idade],
-  );
-
-  return resultado.rows[0];
+  const novoUsuario = await usuariosRepository.criarUsuario(usuario);
+  return novoUsuario;
 }
 
 async function buscarUsuarioPorId(id) {
-  const resultado = await db.query(
-    `
-      SELECT *
-      FROM usuarios
-      WHERE id = $1;
-    `,
-    [id],
-  );
-  return resultado.rows[0];
+  const usuario = await usuariosRepository.buscarUsuarioPorId(id);
+
+  if (!usuario) {
+    throw new NotFoundError('Usuário não encontrado');
+  }
+
+  return usuario;
 }
 
 async function atualizarUsuario(id, dadosAtualizados) {
-  const resultado = await db.query(
-    `
-      UPDATE usuarios
-      SET nome = $1,
-          idade = $2
-      WHERE id = $3
-      RETURNING *;
-    `,
-    [dadosAtualizados.nome, dadosAtualizados.idade, id],
+  await buscarUsuarioPorId(id);
+
+  const usuarioAtualizado = await usuariosRepository.atualizarUsuario(
+    id,
+    dadosAtualizados,
   );
-  return resultado.rows[0];
+
+  return usuarioAtualizado;
 }
 
 async function removerUsuario(id) {
-  const resultado = await db.query(
-    `
-      DELETE FROM usuarios
-      WHERE id = $1
-      RETURNING *;
-    `,
-    [id],
-  );
-  return resultado.rows[0];
+  await buscarUsuarioPorId(id);
+
+  await usuariosRepository.removerUsuario(id);
 }
 
 module.exports = {

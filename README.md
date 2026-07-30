@@ -1,14 +1,16 @@
+# **_ DESATUALIZADO _**
+
 # Fastify API Basics
 
 Projeto de estudos de backend com Node.js e Fastify, implementando uma API REST para aprender os principais conceitos do framework
 
-# Tecnologias:
+### Tecnologias:
 
 - Node.js
 - Fastify
 - JavaScript
 
-# Estrutura:
+### Estrutura:
 
 server.js
 routes/
@@ -16,11 +18,11 @@ controllers/
 services/
 data/
 
-# Rotas Implementadas:
+### Rotas Implementadas:
 
 - GET /usuarios
 
-## Como executar:
+### Como executar:
 
 npm install
 node server

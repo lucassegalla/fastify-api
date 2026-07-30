@@ -23,12 +23,6 @@ async function buscarUsuarioPorId(request, reply) {
 
   const usuario = await usuariosService.buscarUsuarioPorId(id);
 
-  if (!usuario) {
-    return reply.code(404).send({
-      mensagem: 'Usuário não encontrado',
-    });
-  }
-
   return reply.code(200).send(usuario);
 }
 
@@ -41,25 +35,13 @@ async function atualizarUsuario(request, reply) {
     dadosAtualizados,
   );
 
-  if (!usuarioAtualizado) {
-    return reply.code(404).send({
-      mensagem: 'Usuário não encontrado',
-    });
-  }
-
   return reply.code(200).send(usuarioAtualizado);
 }
 
 async function removerUsuario(request, reply) {
   const id = Number(request.params.id);
 
-  const removido = await usuariosService.removerUsuario(id);
-
-  if (!removido) {
-    return reply.code(404).send({
-      mensagem: 'Usuario não encontrado',
-    });
-  }
+  await usuariosService.removerUsuario(id);
 
   return reply.code(204).send();
 }
