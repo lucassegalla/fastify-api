@@ -1,3 +1,20 @@
+const listarUsuariosSchema = {
+  querystring: {
+    type: 'object',
+    properties: {
+      page: {
+        type: 'integer',
+        minimum: 1,
+      },
+      limit: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 100,
+      },
+    },
+  },
+};
+
 const usuarioPorIdSchema = {
   params: {
     type: 'object',
@@ -34,6 +51,7 @@ const atualizarUsuarioSchema = {
 };
 
 module.exports = {
+  listarUsuariosSchema,
   criarUsuarioSchema,
   usuarioPorIdSchema,
   atualizarUsuarioSchema,

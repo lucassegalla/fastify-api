@@ -1,13 +1,18 @@
 const usuariosController = require('../controllers/usuariosController');
 
 const {
+  listarUsuariosSchema,
   criarUsuarioSchema,
   usuarioPorIdSchema,
   atualizarUsuarioSchema,
 } = require('../schemas/usuariosSchema');
 
 async function usuariosRoutes(fastify) {
-  fastify.get('/usuarios', usuariosController.listarUsuarios);
+  fastify.get(
+    '/usuarios',
+    { schema: listarUsuariosSchema },
+    usuariosController.listarUsuarios,
+  );
 
   fastify.get(
     '/usuarios/:id',

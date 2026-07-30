@@ -1,8 +1,30 @@
 const db = require('../database/connection');
 
-async function listarUsuarios() {
-  const resultado = await db.query('SELECT * FROM usuarios');
-  return resultado.rows;
+async function listarUsuarios(page, limit) {
+  const offset = (page - 1) * limit;
+  const resultado = await db.query(
+    `
+      SELECT * FROM usuarios
+      ORDER BY id
+      LIMIT $1
+      OFFSET $2;
+    `,
+    [limit, offset],
+  );
+
+  const resultadoTotal = await db.query('SELECT COUNT(*) FROM usuarios');
+  const totalUsuarios = Number(resultadoTotal.rows[0].count);
+  const totalPaginas = Math.ceil(totalUsuarios / limit);
+
+  return {
+    dados: resultado.rows,
+    paginacao: {
+      paginaAtual: page,
+      limite: limit,
+      totalUsuarios,
+      totalPaginas,
+    },
+  };
 }
 
 async function criarUsuario(usuario) {

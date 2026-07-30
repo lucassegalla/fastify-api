@@ -1,7 +1,11 @@
 const usuariosService = require('../services/usuariosService');
 
 async function listarUsuarios(request, reply) {
-  const usuarios = await usuariosService.listarUsuarios();
+  const query = request.query;
+  const page = Number(query.page ?? 1);
+  const limit = Number(query.limit ?? 10);
+
+  const usuarios = await usuariosService.listarUsuarios(page, limit);
 
   return reply.code(200).send(usuarios);
 }
