@@ -6,9 +6,9 @@ Projeto de estudos de backend com Node.js e Fastify, implementando uma API REST 
 
 ### Tecnologias:
 
+- JavaScript
 - Node.js
 - Fastify
-- JavaScript
 
 ### Estrutura:
 

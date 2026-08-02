@@ -1,6 +1,7 @@
 const listarUsuariosSchema = {
   querystring: {
     type: 'object',
+    additionalProperties: false,
     properties: {
       page: {
         type: 'integer',
@@ -18,6 +19,7 @@ const listarUsuariosSchema = {
 const usuarioPorIdSchema = {
   params: {
     type: 'object',
+    additionalProperties: false,
     required: ['id'],
     properties: {
       id: {
@@ -31,6 +33,7 @@ const usuarioPorIdSchema = {
 const criarUsuarioSchema = {
   body: {
     type: 'object',
+    additionalProperties: false,
     required: ['nome', 'idade'],
     properties: {
       nome: {

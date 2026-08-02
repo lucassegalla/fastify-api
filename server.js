@@ -3,6 +3,11 @@ require('dotenv').config();
 //habilitar logger
 const fastify = require('fastify')({
   logger: true,
+  ajv: {
+    customOptions: {
+      removeAdditional: false,
+    },
+  },
 });
 
 //tratamento de erros

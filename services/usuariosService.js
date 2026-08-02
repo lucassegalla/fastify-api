@@ -1,5 +1,18 @@
 const usuariosRepository = require('../repositories/usuariosRepository');
 const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+
+function normalizarNome(nome) {
+  const nomeNormalizado = nome.trim();
+
+  if (nomeNormalizado.length < 3) {
+    throw new BadRequestError(
+      'Nome deve possuir pelo menos 3 caracteres válidos',
+    );
+  }
+
+  return nomeNormalizado;
+}
 
 async function listarUsuarios(page, limit) {
   const offset = (page - 1) * limit;
@@ -20,7 +33,13 @@ async function listarUsuarios(page, limit) {
 }
 
 async function criarUsuario(usuario) {
-  const novoUsuario = await usuariosRepository.criarUsuario(usuario);
+  const usuarioNormalizado = {
+    ...usuario,
+    nome: normalizarNome(usuario.nome),
+  };
+
+  const novoUsuario = await usuariosRepository.criarUsuario(usuarioNormalizado);
+
   return novoUsuario;
 }
 
@@ -37,9 +56,14 @@ async function buscarUsuarioPorId(id) {
 async function atualizarUsuario(id, dadosAtualizados) {
   await buscarUsuarioPorId(id);
 
+  const dadosNormalizado = {
+    ...dadosAtualizados,
+    nome: normalizarNome(dadosAtualizados.nome),
+  };
+
   const usuarioAtualizado = await usuariosRepository.atualizarUsuario(
     id,
-    dadosAtualizados,
+    dadosNormalizado,
   );
 
   return usuarioAtualizado;
