@@ -123,8 +123,6 @@ npm start
 
 ## Endpoints
 
-## Endpoints
-
 | Método   | Endpoint        | Status | Descrição                          |
 | :------- | :-------------- | :----: | :--------------------------------- |
 | `GET`    | `/`             | `200`  | Verifica se a API está em execução |
