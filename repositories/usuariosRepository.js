@@ -68,9 +68,16 @@ async function removerUsuario(id) {
   );
 }
 
+async function limparUsuarios() {
+  await db.query('TRUNCATE TABLE usuarios RESTART IDENTITY');
+}
+
 module.exports = {
   listarUsuarios,
   contarUsuarios,
   criarUsuario,
+  atualizarUsuario,
   buscarUsuarioPorId,
+  removerUsuario,
+  limparUsuarios,
 };

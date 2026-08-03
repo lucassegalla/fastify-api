@@ -67,6 +67,7 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 ├── routes/
 ├── schemas/
 ├── services/
+├── tests/
 ├── app.js
 └── server.js
 ```
@@ -121,6 +122,16 @@ DB_PASSWORD=sua_senha
 npm start
 ```
 
+## Testes Automatizados
+
+O projeto possui testes de integração utilizando o módulo nativo `node:test` e o método `fastify.inject()`, permitindo validar o comportamento da API sem a necessidade de iniciar um servidor HTTP, para executa-los, crie um segundo banco de dados destinado exclusivamente ao ambiente de testes e configure suas credenciais no arquivo `.env.test`.
+
+Para executar os testes:
+
+```bash
+npm test
+```
+
 ## Endpoints
 
 | Método   | Endpoint        | Status | Descrição                          |
@@ -144,10 +155,10 @@ npm start
 - [x] Tratamento centralizado de erros
 - [x] Validação com JSON Schema
 - [x] Paginação
+- [x] Testes automatizados
 
 ### Próximos passos
 
-- [ ] Testes automatizados
 - [ ] Documentação da API (Swagger/OpenAPI)
 - [ ] Autenticação e autorização (JWT)
 - [ ] Docker

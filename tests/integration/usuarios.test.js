@@ -1,0 +1,307 @@
+const { test, beforeEach } = require('node:test');
+const assert = require('node:assert/strict');
+const construirApp = require('../../app');
+const usuariosRepository = require('../../repositories/usuariosRepository');
+
+beforeEach(async () => {
+  await usuariosRepository.limparUsuarios();
+});
+
+test('GET / deve retornar API funcionando', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const resposta = await app.inject({
+    method: 'GET',
+    url: '/',
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+
+  assert.deepEqual(body, {
+    mensagem: 'API funcionando',
+  });
+  await app.close();
+});
+
+test('GET /usuarios deve retornar status 200', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const resposta = await app.inject({
+    method: 'GET',
+    url: '/usuarios',
+  });
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+  assert.ok(Array.isArray(body.dados));
+  assert.ok(body.paginacao);
+  assert.equal(typeof body.paginacao.paginaAtual, 'number');
+  assert.equal(typeof body.paginacao.limite, 'number');
+  assert.equal(typeof body.paginacao.totalUsuarios, 'number');
+  assert.equal(typeof body.paginacao.totalPaginas, 'number');
+});
+
+test('GET /usuarios deve aplicar paginação informada', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  for (let i = 1; i <= 7; i++) {
+    await usuariosRepository.criarUsuario({
+      nome: `Usuário ${i}`,
+      idade: 20 + i,
+    });
+  }
+
+  const resposta = await app.inject({
+    method: 'GET',
+    url: '/usuarios?page=2&limit=5',
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+  assert.equal(body.paginacao.paginaAtual, 2);
+  assert.equal(body.paginacao.limite, 5);
+  assert.equal(body.paginacao.totalUsuarios, 7);
+  assert.equal(body.paginacao.totalPaginas, 2);
+  assert.equal(body.dados.length, 2);
+  assert.equal(body.dados[0].id, 6);
+  assert.equal(body.dados[1].id, 7);
+
+  await app.close();
+});
+
+test('GET /usuarios deve rejeitar página inválida', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const resposta = await app.inject({
+    method: 'GET',
+    url: '/usuarios?page=0',
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 400);
+  assert.equal(body.error, 'Bad Request');
+
+  await app.close();
+});
+
+test('POST /usuarios deve criar um usuário', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const resposta = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Usuário de Teste',
+      idade: 25,
+    },
+  });
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 201);
+  assert.equal(body.nome, 'Usuário de Teste');
+  assert.equal(body.idade, 25);
+  assert.equal(typeof body.id, 'number');
+
+  await app.close();
+});
+
+test('POST /usuarios deve criar usuario com nome normalizado', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const resposta = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: '    Nome Normalizado     ',
+      idade: 25,
+    },
+  });
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 201);
+  assert.equal(body.nome, 'Nome Normalizado');
+  assert.equal(body.idade, 25);
+  assert.equal(typeof body.id, 'number');
+
+  await app.close();
+});
+
+test('POST /usuarios deve rejeitar nome inválido após normalização', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const resposta = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: '   ',
+      idade: 25,
+    },
+  });
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 400);
+  assert.equal(body.error, 'Bad Request');
+  assert.equal(
+    body.message,
+    'Nome deve possuir pelo menos 3 caracteres válidos',
+  );
+  await app.close();
+});
+
+test('GET /usuarios/:id deve retornar um usuário', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const usuario = await usuariosRepository.criarUsuario({
+    nome: 'Nome exemplo',
+    idade: 24,
+  });
+
+  const resposta = await app.inject({
+    method: 'GET',
+    url: `/usuarios/${usuario.id}`,
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+  assert.equal(body.id, usuario.id);
+  assert.equal(body.nome, 'Nome exemplo');
+  assert.equal(body.idade, 24);
+
+  await app.close();
+});
+
+test('GET /usuarios/:id deve retornar 404 para usuário inexistente', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const resposta = await app.inject({
+    method: 'GET',
+    url: '/usuarios/999',
+  });
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 404);
+  assert.equal(body.error, 'Not Found');
+  assert.equal(body.message, 'Usuário não encontrado');
+
+  await app.close();
+});
+
+test('PUT /usuarios/:id deve atualizar um usuário', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const usuario = await usuariosRepository.criarUsuario({
+    nome: 'Lucas',
+    idade: 24,
+  });
+
+  const resposta = await app.inject({
+    method: 'PUT',
+    url: `/usuarios/${usuario.id}`,
+    payload: {
+      nome: 'Nome atualizado',
+      idade: 25,
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+  assert.equal(body.id, usuario.id);
+  assert.equal(body.nome, 'Nome atualizado');
+  assert.equal(body.idade, 25);
+
+  await app.close();
+});
+
+test('PUT /usuarios/:id deve retornar 404 para usuário inexistente', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const resposta = await app.inject({
+    method: 'PUT',
+    url: '/usuarios/999',
+    payload: {
+      nome: 'Nome atualizado',
+      idade: 25,
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 404);
+  assert.equal(body.error, 'Not Found');
+  assert.equal(body.message, 'Usuário não encontrado');
+
+  await app.close();
+});
+
+test('DELETE /usuarios/:id deve remover um usuário', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const usuario = await usuariosRepository.criarUsuario({
+    nome: 'Lucas',
+    idade: 24,
+  });
+
+  const resposta = await app.inject({
+    method: 'DELETE',
+    url: `/usuarios/${usuario.id}`,
+  });
+
+  assert.equal(resposta.statusCode, 204);
+
+  const usuarioRemovido = await usuariosRepository.buscarUsuarioPorId(
+    usuario.id,
+  );
+
+  assert.equal(usuarioRemovido, undefined);
+
+  await app.close();
+});
+
+test('DELETE /usuarios/:id deve retornar 404 para usuário inexistente', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const resposta = await app.inject({
+    method: 'DELETE',
+    url: '/usuarios/999',
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 404);
+  assert.equal(body.error, 'Not Found');
+  assert.equal(body.message, 'Usuário não encontrado');
+
+  await app.close();
+});

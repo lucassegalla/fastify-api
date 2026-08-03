@@ -1,9 +1,11 @@
-require('dotenv').config();
+require('dotenv').config({
+  path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+});
 
-function construirApp() {
+function construirApp(options = {}) {
   //habilitar logger
   const fastify = require('fastify')({
-    logger: true,
+    logger: options.logger ?? true,
     ajv: {
       customOptions: {
         removeAdditional: false,
