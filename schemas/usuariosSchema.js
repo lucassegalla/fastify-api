@@ -3,7 +3,7 @@
 const usuarioSchema = {
   type: 'object',
   additionalProperties: false,
-  required: ['id', 'nome', 'idade'],
+  required: ['id', 'nome', 'email', 'idade'],
   properties: {
     id: {
       type: 'integer',
@@ -13,6 +13,11 @@ const usuarioSchema = {
       type: 'string',
       description: 'Nome do usuário',
     },
+    email: {
+      type: 'string',
+      format: 'email',
+      description: 'Email do usuário',
+    },
     idade: {
       type: 'integer',
       description: 'Idade do usuário',
@@ -20,15 +25,48 @@ const usuarioSchema = {
   },
 };
 
-const usuarioBodySchema = {
+const usuarioCriacaoBodySchema = {
   type: 'object',
   additionalProperties: false,
-  required: ['nome', 'idade'],
+  required: ['nome', 'email', 'senha', 'idade'],
   properties: {
     nome: {
       type: 'string',
       minLength: 3,
       description: 'Nome do usuário',
+    },
+    email: {
+      type: 'string',
+      format: 'email',
+      description: 'E-mail do usuário',
+    },
+    senha: {
+      type: 'string',
+      minLength: 6,
+      description: 'Senha do usuário',
+    },
+    idade: {
+      type: 'integer',
+      minimum: 0,
+      description: 'Idade do usuário',
+    },
+  },
+};
+
+const usuarioAtualizacaoBodySchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['nome', 'email', 'idade'],
+  properties: {
+    nome: {
+      type: 'string',
+      minLength: 3,
+      description: 'Nome do usuário',
+    },
+    email: {
+      type: 'string',
+      format: 'email',
+      description: 'E-mail do usuário',
     },
     idade: {
       type: 'integer',
@@ -155,7 +193,7 @@ const criarUsuarioSchema = {
   summary: 'Criar usuário',
   description: 'Cria um novo usuário',
   tags: ['Usuários'],
-  body: usuarioBodySchema,
+  body: usuarioCriacaoBodySchema,
   response: {
     201: usuarioSchema,
     400: errorSchema,
@@ -167,7 +205,7 @@ const atualizarUsuarioSchema = {
   description: 'Atualiza os dados de um usuário existente',
   tags: ['Usuários'],
   params: usuarioIdParamsSchema,
-  body: usuarioBodySchema,
+  body: usuarioAtualizacaoBodySchema,
   response: {
     200: usuarioSchema,
     400: errorSchema,

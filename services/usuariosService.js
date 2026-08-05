@@ -1,16 +1,15 @@
 const usuariosRepository = require('../repositories/usuariosRepository');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
+const bcrypt = require('bcrypt');
 
 function normalizarNome(nome) {
   const nomeNormalizado = nome.trim();
-
   if (nomeNormalizado.length < 3) {
     throw new BadRequestError(
       'Nome deve possuir pelo menos 3 caracteres válidos',
     );
   }
-
   return nomeNormalizado;
 }
 
@@ -33,12 +32,15 @@ async function listarUsuarios(page, limit) {
 }
 
 async function criarUsuario(usuario) {
-  const usuarioNormalizado = {
-    ...usuario,
+  const senhaHash = await bcrypt.hash(usuario.senha, 10);
+  const dadosUsuario = {
     nome: normalizarNome(usuario.nome),
+    email: usuario.email,
+    senha_hash: senhaHash,
+    idade: usuario.idade,
   };
 
-  const novoUsuario = await usuariosRepository.criarUsuario(usuarioNormalizado);
+  const novoUsuario = await usuariosRepository.criarUsuario(dadosUsuario);
 
   return novoUsuario;
 }

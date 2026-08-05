@@ -42,6 +42,9 @@ function construirApp(options = {}) {
   const usuariosRoutes = require('./routes/usuarios');
   fastify.register(usuariosRoutes);
 
+  const autenticacaoRoutes = require('./routes/autenticacao');
+  fastify.register(autenticacaoRoutes);
+
   //rota inicial
   fastify.get('/', async (request, reply) => {
     return { mensagem: 'API funcionando' };

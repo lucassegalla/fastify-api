@@ -129,6 +129,7 @@ npm start
 ## Testes Automatizados
 
 O projeto possui testes de integração utilizando o módulo nativo `node:test` e o método `fastify.inject()`, permitindo validar o comportamento da API sem a necessidade de iniciar um servidor HTTP
+
 Para executá-los, crie um segundo banco de dados destinado exclusivamente ao ambiente de testes e configure suas credenciais no arquivo `.env.test`.
 
 Para executar os testes:
