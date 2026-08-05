@@ -2,9 +2,10 @@ const usuariosController = require('../controllers/usuariosController');
 
 const {
   listarUsuariosSchema,
+  buscarUsuarioPorIdSchema,
   criarUsuarioSchema,
-  usuarioPorIdSchema,
   atualizarUsuarioSchema,
+  removerUsuarioPorIdSchema,
 } = require('../schemas/usuariosSchema');
 
 async function usuariosRoutes(fastify) {
@@ -16,7 +17,7 @@ async function usuariosRoutes(fastify) {
 
   fastify.get(
     '/usuarios/:id',
-    { schema: usuarioPorIdSchema },
+    { schema: buscarUsuarioPorIdSchema },
     usuariosController.buscarUsuarioPorId,
   );
 
@@ -34,7 +35,7 @@ async function usuariosRoutes(fastify) {
 
   fastify.delete(
     '/usuarios/:id',
-    { schema: usuarioPorIdSchema },
+    { schema: removerUsuarioPorIdSchema },
     usuariosController.removerUsuario,
   );
 }

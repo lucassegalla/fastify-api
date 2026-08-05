@@ -56,14 +56,14 @@ async function buscarUsuarioPorId(id) {
 async function atualizarUsuario(id, dadosAtualizados) {
   await buscarUsuarioPorId(id);
 
-  const dadosNormalizado = {
+  const dadosNormalizados = {
     ...dadosAtualizados,
     nome: normalizarNome(dadosAtualizados.nome),
   };
 
   const usuarioAtualizado = await usuariosRepository.atualizarUsuario(
     id,
-    dadosNormalizado,
+    dadosNormalizados,
   );
 
   return usuarioAtualizado;

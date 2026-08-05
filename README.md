@@ -9,9 +9,10 @@ Projeto criado com o objetivo de estudar os fundamentos do Node.js, aprofundar o
 ## Tecnologias Utilizadas
 
 - **JavaScript**
-- **Node.js** - Ambiente de execução JavaScript.
-- **Fastify** - Framework para construção da API REST.
-- **PostgreSQL** - Sistema de gerenciamento de banco de dados relacional.
+- **Node.js** - Ambiente de execução JavaScript
+- **Fastify** - Framework para construção da API REST
+- **PostgreSQL** - Sistema de gerenciamento de banco de dados relacional
+- **OpenAPI (Swagger)** - Documentação automática da API
 
 ## Arquitetura
 
@@ -60,6 +61,7 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 
 ```text
 .
+├── config/
 ├── controllers/
 ├── database/
 ├── errors/
@@ -88,6 +90,8 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 - Validação de requisições com JSON Schema
 - Tratamento centralizado de erros
 - Normalização de dados antes da persistência
+- Documentação automática com OpenAPI (Swagger)
+- Testes de integração
 
 ## Como executar
 
@@ -124,13 +128,24 @@ npm start
 
 ## Testes Automatizados
 
-O projeto possui testes de integração utilizando o módulo nativo `node:test` e o método `fastify.inject()`, permitindo validar o comportamento da API sem a necessidade de iniciar um servidor HTTP, para executa-los, crie um segundo banco de dados destinado exclusivamente ao ambiente de testes e configure suas credenciais no arquivo `.env.test`.
+O projeto possui testes de integração utilizando o módulo nativo `node:test` e o método `fastify.inject()`, permitindo validar o comportamento da API sem a necessidade de iniciar um servidor HTTP
+Para executá-los, crie um segundo banco de dados destinado exclusivamente ao ambiente de testes e configure suas credenciais no arquivo `.env.test`.
 
 Para executar os testes:
 
 ```bash
 npm test
 ```
+
+## Documentação da API
+
+Após iniciar a aplicação, a documentação interativa estará disponível em:
+
+```text
+http://localhost:3000/docs
+```
+
+A documentação é gerada automaticamente a partir dos JSON Schemas definidos na aplicação utilizando OpenAPI (Swagger).
 
 ## Endpoints
 
@@ -156,10 +171,10 @@ npm test
 - [x] Validação com JSON Schema
 - [x] Paginação
 - [x] Testes automatizados
+- [x] Documentação da API (Swagger/OpenAPI)
 
 ### Próximos passos
 
-- [ ] Documentação da API (Swagger/OpenAPI)
 - [ ] Autenticação e autorização (JWT)
 - [ ] Docker
 - [ ] Docker Compose

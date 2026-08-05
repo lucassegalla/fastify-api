@@ -1,3 +1,5 @@
+const configurarSwagger = require('./config/swagger');
+
 require('dotenv').config({
   path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
 });
@@ -12,6 +14,8 @@ function construirApp(options = {}) {
       },
     },
   });
+
+  fastify.register(configurarSwagger);
 
   //tratamento de erros
   fastify.setErrorHandler((error, request, reply) => {
