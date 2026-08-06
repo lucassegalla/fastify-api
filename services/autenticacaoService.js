@@ -9,13 +9,6 @@ async function login(email, senha) {
     throw new UnauthorizedError('Credenciais inválidas');
   }
 
-  console.log({
-    senha,
-    tipoSenha: typeof senha,
-    senhaHash: usuario.senha_hash,
-    tipoSenhaHash: typeof usuario.senha_hash,
-  });
-
   const senhaCorreta = await bcrypt.compare(senha, usuario.senha_hash);
 
   if (!senhaCorreta) {

@@ -3,6 +3,9 @@ const assert = require('node:assert/strict');
 const construirApp = require('../../app');
 const usuariosRepository = require('../../repositories/usuariosRepository');
 
+const senhaTeste = '123456';
+const senhaHashTeste = 'hash_de_teste';
+
 beforeEach(async () => {
   await usuariosRepository.limparUsuarios();
 });
@@ -20,10 +23,10 @@ test('GET / deve retornar API funcionando', async () => {
   const body = JSON.parse(resposta.body);
 
   assert.equal(resposta.statusCode, 200);
-
   assert.deepEqual(body, {
     mensagem: 'API funcionando',
   });
+
   await app.close();
 });
 
@@ -36,6 +39,7 @@ test('GET /usuarios deve retornar status 200', async () => {
     method: 'GET',
     url: '/usuarios',
   });
+
   const body = JSON.parse(resposta.body);
 
   assert.equal(resposta.statusCode, 200);
@@ -45,6 +49,8 @@ test('GET /usuarios deve retornar status 200', async () => {
   assert.equal(typeof body.paginacao.limite, 'number');
   assert.equal(typeof body.paginacao.totalUsuarios, 'number');
   assert.equal(typeof body.paginacao.totalPaginas, 'number');
+
+  await app.close();
 });
 
 test('GET /usuarios deve aplicar paginação informada', async () => {
@@ -54,7 +60,9 @@ test('GET /usuarios deve aplicar paginação informada', async () => {
 
   for (let i = 1; i <= 7; i++) {
     await usuariosRepository.criarUsuario({
-      nome: `Usuário ${i}`,
+      nome: `Nome Exemplo ${i}`,
+      email: `usuario${i}@exemplo.com`,
+      senha_hash: `${senhaHashTeste}_${i}`,
       idade: 20 + i,
     });
   }
@@ -105,21 +113,26 @@ test('POST /usuarios deve criar um usuário', async () => {
     method: 'POST',
     url: '/usuarios',
     payload: {
-      nome: 'Usuário de Teste',
+      nome: 'Nome Exemplo',
+      email: 'usuario@exemplo.com',
+      senha: senhaTeste,
       idade: 25,
     },
   });
+
   const body = JSON.parse(resposta.body);
 
   assert.equal(resposta.statusCode, 201);
-  assert.equal(body.nome, 'Usuário de Teste');
+  assert.equal(body.nome, 'Nome Exemplo');
+  assert.equal(body.email, 'usuario@exemplo.com');
   assert.equal(body.idade, 25);
   assert.equal(typeof body.id, 'number');
+  assert.equal(body.senha_hash, undefined);
 
   await app.close();
 });
 
-test('POST /usuarios deve criar usuario com nome normalizado', async () => {
+test('POST /usuarios deve criar usuário com nome normalizado', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -128,14 +141,18 @@ test('POST /usuarios deve criar usuario com nome normalizado', async () => {
     method: 'POST',
     url: '/usuarios',
     payload: {
-      nome: '    Nome Normalizado     ',
+      nome: '    Nome Exemplo     ',
+      email: 'usuario@exemplo.com',
+      senha: senhaTeste,
       idade: 25,
     },
   });
+
   const body = JSON.parse(resposta.body);
 
   assert.equal(resposta.statusCode, 201);
-  assert.equal(body.nome, 'Nome Normalizado');
+  assert.equal(body.nome, 'Nome Exemplo');
+  assert.equal(body.email, 'usuario@exemplo.com');
   assert.equal(body.idade, 25);
   assert.equal(typeof body.id, 'number');
 
@@ -152,9 +169,12 @@ test('POST /usuarios deve rejeitar nome inválido após normalização', async (
     url: '/usuarios',
     payload: {
       nome: '   ',
+      email: 'usuario@exemplo.com',
+      senha: senhaTeste,
       idade: 25,
     },
   });
+
   const body = JSON.parse(resposta.body);
 
   assert.equal(resposta.statusCode, 400);
@@ -163,6 +183,7 @@ test('POST /usuarios deve rejeitar nome inválido após normalização', async (
     body.message,
     'Nome deve possuir pelo menos 3 caracteres válidos',
   );
+
   await app.close();
 });
 
@@ -172,7 +193,9 @@ test('GET /usuarios/:id deve retornar um usuário', async () => {
   });
 
   const usuario = await usuariosRepository.criarUsuario({
-    nome: 'Nome exemplo',
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha_hash: senhaHashTeste,
     idade: 24,
   });
 
@@ -185,8 +208,10 @@ test('GET /usuarios/:id deve retornar um usuário', async () => {
 
   assert.equal(resposta.statusCode, 200);
   assert.equal(body.id, usuario.id);
-  assert.equal(body.nome, 'Nome exemplo');
+  assert.equal(body.nome, 'Nome Exemplo');
+  assert.equal(body.email, 'usuario@exemplo.com');
   assert.equal(body.idade, 24);
+  assert.equal(body.senha_hash, undefined);
 
   await app.close();
 });
@@ -200,6 +225,7 @@ test('GET /usuarios/:id deve retornar 404 para usuário inexistente', async () =
     method: 'GET',
     url: '/usuarios/999',
   });
+
   const body = JSON.parse(resposta.body);
 
   assert.equal(resposta.statusCode, 404);
@@ -215,7 +241,9 @@ test('PUT /usuarios/:id deve atualizar um usuário', async () => {
   });
 
   const usuario = await usuariosRepository.criarUsuario({
-    nome: 'Lucas',
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha_hash: senhaHashTeste,
     idade: 24,
   });
 
@@ -223,7 +251,8 @@ test('PUT /usuarios/:id deve atualizar um usuário', async () => {
     method: 'PUT',
     url: `/usuarios/${usuario.id}`,
     payload: {
-      nome: 'Nome atualizado',
+      nome: 'Nome Atualizado',
+      email: 'usuario.atualizado@exemplo.com',
       idade: 25,
     },
   });
@@ -232,8 +261,10 @@ test('PUT /usuarios/:id deve atualizar um usuário', async () => {
 
   assert.equal(resposta.statusCode, 200);
   assert.equal(body.id, usuario.id);
-  assert.equal(body.nome, 'Nome atualizado');
+  assert.equal(body.nome, 'Nome Atualizado');
+  assert.equal(body.email, 'usuario.atualizado@exemplo.com');
   assert.equal(body.idade, 25);
+  assert.equal(body.senha_hash, undefined);
 
   await app.close();
 });
@@ -247,7 +278,8 @@ test('PUT /usuarios/:id deve retornar 404 para usuário inexistente', async () =
     method: 'PUT',
     url: '/usuarios/999',
     payload: {
-      nome: 'Nome atualizado',
+      nome: 'Nome Atualizado',
+      email: 'usuario.atualizado@exemplo.com',
       idade: 25,
     },
   });
@@ -267,7 +299,9 @@ test('DELETE /usuarios/:id deve remover um usuário', async () => {
   });
 
   const usuario = await usuariosRepository.criarUsuario({
-    nome: 'Lucas',
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha_hash: senhaHashTeste,
     idade: 24,
   });
 
@@ -302,6 +336,97 @@ test('DELETE /usuarios/:id deve retornar 404 para usuário inexistente', async (
   assert.equal(resposta.statusCode, 404);
   assert.equal(body.error, 'Not Found');
   assert.equal(body.message, 'Usuário não encontrado');
+
+  await app.close();
+});
+
+test('POST /login deve autenticar usuário com credenciais válidas', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'usuario@exemplo.com',
+      senha: senhaTeste,
+      idade: 24,
+    },
+  });
+
+  const resposta = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario@exemplo.com',
+      senha: senhaTeste,
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+  assert.equal(body.nome, 'Nome Exemplo');
+  assert.equal(body.email, 'usuario@exemplo.com');
+  assert.equal(body.idade, 24);
+  assert.equal(body.senha_hash, undefined);
+
+  await app.close();
+});
+
+test('POST /login deve retornar 401 para senha incorreta', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'usuario@exemplo.com',
+      senha: senhaTeste,
+      idade: 24,
+    },
+  });
+
+  const resposta = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario@exemplo.com',
+      senha: 'senha-incorreta',
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 401);
+  assert.equal(body.error, 'Unauthorized');
+  assert.equal(body.message, 'Credenciais inválidas');
+
+  await app.close();
+});
+
+test('POST /login deve retornar 401 para email inexistente', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+  const resposta = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'inexistente@exemplo.com',
+      senha: senhaTeste,
+    },
+  });
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 401);
+  assert.equal(body.error, 'Unauthorized');
+  assert.equal(body.message, 'Credenciais inválidas');
 
   await app.close();
 });
