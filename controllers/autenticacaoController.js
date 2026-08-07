@@ -5,7 +5,19 @@ async function login(request, reply) {
 
   const usuario = await autenticacaoService.login(email, senha);
 
-  return reply.code(200).send(usuario);
+  const token = await reply.jwtSign(
+    {
+      id: usuario.id,
+      role: usuario.role,
+    },
+    {
+      expiresIn: '1h',
+    },
+  );
+
+  return reply.code(200).send({
+    token,
+  });
 }
 
 module.exports = {

@@ -33,6 +33,7 @@ async function atualizarUsuario(request, reply) {
   const usuarioAtualizado = await usuariosService.atualizarUsuario(
     id,
     dadosAtualizados,
+    request.user,
   );
 
   return reply.code(200).send(usuarioAtualizado);
@@ -41,7 +42,7 @@ async function atualizarUsuario(request, reply) {
 async function removerUsuario(request, reply) {
   const id = Number(request.params.id);
 
-  await usuariosService.removerUsuario(id);
+  await usuariosService.removerUsuario(id, request.user);
 
   return reply.code(204).send();
 }

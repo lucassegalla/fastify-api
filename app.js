@@ -1,4 +1,5 @@
 const configurarSwagger = require('./config/swagger');
+const jwt = require('@fastify/jwt');
 
 require('dotenv').config({
   path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
@@ -18,6 +19,13 @@ function construirApp(options = {}) {
   fastify.register(configurarSwagger);
 
   //tratamento de erros
+  const nomeErros = {
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+  };
+
   fastify.setErrorHandler((error, request, reply) => {
     fastify.log.error(error);
 
@@ -26,7 +34,7 @@ function construirApp(options = {}) {
     const errorName =
       statusCode >= 500
         ? 'Internal Server Error'
-        : error.error || 'Bad Request';
+        : error.error || nomeErros[statusCode] || 'Bad Request';
 
     const message =
       statusCode >= 500 ? 'Erro interno do servidor' : error.message;
@@ -36,6 +44,10 @@ function construirApp(options = {}) {
       error: errorName,
       message,
     });
+  });
+
+  fastify.register(jwt, {
+    secret: process.env.JWT_SECRET,
   });
 
   //registro de rotas

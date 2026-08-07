@@ -1,4 +1,5 @@
 const usuariosController = require('../controllers/usuariosController');
+const autenticar = require('../middlewares/autenticacao');
 
 const {
   listarUsuariosSchema,
@@ -11,7 +12,10 @@ const {
 async function usuariosRoutes(fastify) {
   fastify.get(
     '/usuarios',
-    { schema: listarUsuariosSchema },
+    {
+      preHandler: autenticar,
+      schema: listarUsuariosSchema,
+    },
     usuariosController.listarUsuarios,
   );
 
@@ -29,13 +33,19 @@ async function usuariosRoutes(fastify) {
 
   fastify.put(
     '/usuarios/:id',
-    { schema: atualizarUsuarioSchema },
+    {
+      preHandler: autenticar,
+      schema: atualizarUsuarioSchema,
+    },
     usuariosController.atualizarUsuario,
   );
 
   fastify.delete(
     '/usuarios/:id',
-    { schema: removerUsuarioPorIdSchema },
+    {
+      preHandler: autenticar,
+      schema: removerUsuarioPorIdSchema,
+    },
     usuariosController.removerUsuario,
   );
 }

@@ -20,6 +20,7 @@ async function login(email, senha) {
     nome: usuario.nome,
     email: usuario.email,
     idade: usuario.idade,
+    role: usuario.role,
   };
 }
 

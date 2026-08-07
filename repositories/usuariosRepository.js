@@ -61,7 +61,8 @@ async function buscarUsuarioPorEmail(email) {
       nome,
       email,
       senha_hash,
-      idade
+      idade,
+      role
     FROM usuarios
     WHERE email = $1;
     `,
@@ -82,6 +83,20 @@ async function atualizarUsuario(id, dadosAtualizados) {
     `,
     [dadosAtualizados.nome, dadosAtualizados.email, dadosAtualizados.idade, id],
   );
+  return resultado.rows[0];
+}
+
+async function atualizarRoleUsuario(id, role) {
+  const resultado = await db.query(
+    `
+      UPDATE usuarios
+      SET role = $1
+      WHERE id = $2
+      RETURNING id, nome, email, idade, role;
+    `,
+    [role, id],
+  );
+
   return resultado.rows[0];
 }
 
@@ -106,6 +121,7 @@ module.exports = {
   contarUsuarios,
   criarUsuario,
   atualizarUsuario,
+  atualizarRoleUsuario,
   buscarUsuarioPorId,
   buscarUsuarioPorEmail,
   removerUsuario,

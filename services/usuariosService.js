@@ -1,6 +1,7 @@
 const usuariosRepository = require('../repositories/usuariosRepository');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
+const ForbiddenError = require('../errors/ForbiddenError');
 const bcrypt = require('bcrypt');
 
 function normalizarNome(nome) {
@@ -11,6 +12,17 @@ function normalizarNome(nome) {
     );
   }
   return nomeNormalizado;
+}
+
+function validarPermissao(idUsuario, usuarioAutenticado) {
+  const usuarioAdmin = usuarioAutenticado.role === 'admin';
+  const usuarioDonoConta = usuarioAutenticado.id === idUsuario;
+
+  if (usuarioAdmin || usuarioDonoConta) {
+    return;
+  }
+
+  throw new ForbiddenError('Acesso negado');
 }
 
 async function listarUsuarios(page, limit) {
@@ -55,8 +67,10 @@ async function buscarUsuarioPorId(id) {
   return usuario;
 }
 
-async function atualizarUsuario(id, dadosAtualizados) {
+async function atualizarUsuario(id, dadosAtualizados, usuarioAutenticado) {
   await buscarUsuarioPorId(id);
+
+  validarPermissao(id, usuarioAutenticado);
 
   const dadosNormalizados = {
     ...dadosAtualizados,
@@ -71,8 +85,10 @@ async function atualizarUsuario(id, dadosAtualizados) {
   return usuarioAtualizado;
 }
 
-async function removerUsuario(id) {
+async function removerUsuario(id, usuarioAutenticado) {
   await buscarUsuarioPorId(id);
+
+  validarPermissao(id, usuarioAutenticado);
 
   await usuariosRepository.removerUsuario(id);
 }

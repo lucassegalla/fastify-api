@@ -35,9 +35,34 @@ test('GET /usuarios deve retornar status 200', async () => {
     logger: false,
   });
 
+  await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome exemplo',
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+      idade: 24,
+    },
+  });
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
+
   const resposta = await app.inject({
     method: 'GET',
     url: '/usuarios',
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
   });
 
   const body = JSON.parse(resposta.body);
@@ -58,7 +83,7 @@ test('GET /usuarios deve aplicar paginação informada', async () => {
     logger: false,
   });
 
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 6; i++) {
     await usuariosRepository.criarUsuario({
       nome: `Nome Exemplo ${i}`,
       email: `usuario${i}@exemplo.com`,
@@ -67,9 +92,34 @@ test('GET /usuarios deve aplicar paginação informada', async () => {
     });
   }
 
+  await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo 7',
+      email: 'usuario7@exemplo.com',
+      senha: '123456',
+      idade: 27,
+    },
+  });
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario7@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
+
   const resposta = await app.inject({
     method: 'GET',
     url: '/usuarios?page=2&limit=5',
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
   });
 
   const body = JSON.parse(resposta.body);
@@ -240,12 +290,29 @@ test('PUT /usuarios/:id deve atualizar um usuário', async () => {
     logger: false,
   });
 
-  const usuario = await usuariosRepository.criarUsuario({
-    nome: 'Nome Exemplo',
-    email: 'usuario@exemplo.com',
-    senha_hash: senhaHashTeste,
-    idade: 24,
+  const criacao = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+      idade: 20,
+    },
   });
+
+  const usuario = JSON.parse(criacao.body);
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -254,6 +321,9 @@ test('PUT /usuarios/:id deve atualizar um usuário', async () => {
       nome: 'Nome Atualizado',
       email: 'usuario.atualizado@exemplo.com',
       idade: 25,
+    },
+    headers: {
+      authorization: `Bearer ${token}`,
     },
   });
 
@@ -274,6 +344,28 @@ test('PUT /usuarios/:id deve retornar 404 para usuário inexistente', async () =
     logger: false,
   });
 
+  const criacao = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+      idade: 20,
+    },
+  });
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
+
   const resposta = await app.inject({
     method: 'PUT',
     url: '/usuarios/999',
@@ -281,6 +373,9 @@ test('PUT /usuarios/:id deve retornar 404 para usuário inexistente', async () =
       nome: 'Nome Atualizado',
       email: 'usuario.atualizado@exemplo.com',
       idade: 25,
+    },
+    headers: {
+      authorization: `Bearer ${token}`,
     },
   });
 
@@ -298,16 +393,36 @@ test('DELETE /usuarios/:id deve remover um usuário', async () => {
     logger: false,
   });
 
-  const usuario = await usuariosRepository.criarUsuario({
-    nome: 'Nome Exemplo',
-    email: 'usuario@exemplo.com',
-    senha_hash: senhaHashTeste,
-    idade: 24,
+  const criacao = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+      idade: 20,
+    },
   });
+
+  const usuario = JSON.parse(criacao.body);
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
 
   const resposta = await app.inject({
     method: 'DELETE',
     url: `/usuarios/${usuario.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
   });
 
   assert.equal(resposta.statusCode, 204);
@@ -326,9 +441,34 @@ test('DELETE /usuarios/:id deve retornar 404 para usuário inexistente', async (
     logger: false,
   });
 
+  await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+      idade: 20,
+    },
+  });
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
+
   const resposta = await app.inject({
     method: 'DELETE',
     url: '/usuarios/999',
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
   });
 
   const body = JSON.parse(resposta.body);
@@ -368,10 +508,8 @@ test('POST /login deve autenticar usuário com credenciais válidas', async () =
   const body = JSON.parse(resposta.body);
 
   assert.equal(resposta.statusCode, 200);
-  assert.equal(body.nome, 'Nome Exemplo');
-  assert.equal(body.email, 'usuario@exemplo.com');
-  assert.equal(body.idade, 24);
-  assert.equal(body.senha_hash, undefined);
+  assert.equal(typeof body.token, 'string');
+  assert.ok(body.token.length > 0);
 
   await app.close();
 });
@@ -427,6 +565,308 @@ test('POST /login deve retornar 401 para email inexistente', async () => {
   assert.equal(resposta.statusCode, 401);
   assert.equal(body.error, 'Unauthorized');
   assert.equal(body.message, 'Credenciais inválidas');
+
+  await app.close();
+});
+
+test('PUT /usuarios/:id deve permitir usuário atualizar a própria conta', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+  const criacao = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome exemplo',
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+      idade: 24,
+    },
+  });
+
+  const usuarioCriado = JSON.parse(criacao.body);
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
+
+  const resposta = await app.inject({
+    method: 'PUT',
+    url: `/usuarios/${usuarioCriado.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+    payload: {
+      nome: 'Nome Atualizado',
+      email: 'usuario.atualizado@exemplo.com',
+      idade: 25,
+    },
+  });
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+  assert.equal(body.id, usuarioCriado.id);
+  assert.equal(body.nome, 'Nome Atualizado');
+  assert.equal(body.email, 'usuario.atualizado@exemplo.com');
+  assert.equal(body.idade, 25);
+
+  await app.close();
+});
+
+test('PUT /usuarios/:id não deve permitir usuario atualizar conta de outro usuario', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const criacaoUsuario1 = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo 1',
+      email: 'usuario1@exemplo.com',
+      senha: '123456',
+      idade: 20,
+    },
+  });
+
+  const usuario1 = JSON.parse(criacaoUsuario1.body);
+
+  const criacaoUsuario2 = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo 2',
+      email: 'usuario2@exemplo.com',
+      senha: '123456',
+      idade: 21,
+    },
+  });
+
+  const usuario2 = JSON.parse(criacaoUsuario2.body);
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario1@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
+
+  const resposta = await app.inject({
+    method: 'PUT',
+    url: `/usuarios/${usuario2.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+    payload: {
+      nome: 'Nome Atualizado 2',
+      email: 'usuario2.atualizado@exemplo.com',
+      idade: 25,
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 403);
+  assert.equal(body.error, 'Forbidden');
+  assert.equal(body.message, 'Acesso negado');
+
+  await app.close();
+});
+
+test('DELETE /usuarios/:id não deve permitir usuario deletar conta de outro usuario', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const criacaoUsuario1 = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo 1',
+      email: 'usuario1@exemplo.com',
+      senha: '123456',
+      idade: 20,
+    },
+  });
+
+  const criacaoUsuario2 = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo 2',
+      email: 'usuario2@exemplo.com',
+      senha: '123456',
+      idade: 21,
+    },
+  });
+
+  const usuario2 = JSON.parse(criacaoUsuario2.body);
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'usuario1@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
+
+  const resposta = await app.inject({
+    method: 'DELETE',
+    url: `/usuarios/${usuario2.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 403);
+  assert.equal(body.error, 'Forbidden');
+  assert.equal(body.message, 'Acesso negado');
+
+  await app.close();
+});
+
+test('PUT /usuarios/:id admin pode alterar qualquer usuário', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const criacaoAdmin = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'admin@exemplo.com',
+      senha: '123456',
+      idade: 20,
+    },
+  });
+
+  const usuarioAdmin = JSON.parse(criacaoAdmin.body);
+
+  await usuariosRepository.atualizarRoleUsuario(usuarioAdmin.id, 'admin');
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'admin@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
+
+  const criacaoUsuario = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+      idade: 21,
+    },
+  });
+
+  const usuario = JSON.parse(criacaoUsuario.body);
+
+  const resposta = await app.inject({
+    method: 'PUT',
+    url: `/usuarios/${usuario.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+    payload: {
+      nome: 'Nome Atualizado',
+      email: 'usuario.atualizado@exemplo.com',
+      idade: 25,
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+  assert.equal(body.id, usuario.id);
+  assert.equal(body.nome, 'Nome Atualizado');
+  assert.equal(body.email, 'usuario.atualizado@exemplo.com');
+  assert.equal(body.idade, 25);
+
+  await app.close();
+});
+
+test('DELETE /usuarios/:id admin pode deletar qualquer usuário', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const criacaoAdmin = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'admin@exemplo.com',
+      senha: '123456',
+      idade: 20,
+    },
+  });
+
+  const usuarioAdmin = JSON.parse(criacaoAdmin.body);
+
+  await usuariosRepository.atualizarRoleUsuario(usuarioAdmin.id, 'admin');
+
+  const login = await app.inject({
+    method: 'POST',
+    url: '/login',
+    payload: {
+      email: 'admin@exemplo.com',
+      senha: '123456',
+    },
+  });
+
+  const { token } = JSON.parse(login.body);
+
+  const criacaoUsuario = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: {
+      nome: 'Nome Exemplo',
+      email: 'usuario@exemplo.com',
+      senha: '123456',
+      idade: 21,
+    },
+  });
+
+  const usuario = JSON.parse(criacaoUsuario.body);
+
+  const resposta = await app.inject({
+    method: 'DELETE',
+    url: `/usuarios/${usuario.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+
+  const usuarioRemovido = await usuariosRepository.buscarUsuarioPorId(
+    usuario.id,
+  );
+
+  assert.equal(resposta.statusCode, 204);
+  assert.equal(usuarioRemovido, undefined);
 
   await app.close();
 });
