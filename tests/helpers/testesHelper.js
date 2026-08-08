@@ -13,6 +13,11 @@ async function autenticarUsuario(app, email, senha) {
   return token;
 }
 
+async function criarUsuario(app, dados) {
+
+}
+
 module.exports = {
   autenticarUsuario,
+  criarUsuario,
 };

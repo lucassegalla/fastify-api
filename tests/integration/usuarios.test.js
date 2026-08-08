@@ -2,6 +2,7 @@ const { test, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
 const construirApp = require('../../app');
 const usuariosRepository = require('../../repositories/usuariosRepository');
+const { autenticarUsuario } = require('../helpers/testesHelper');
 
 const senhaTeste = '123456';
 const senhaHashTeste = 'hash_de_teste';
@@ -46,16 +47,11 @@ test('GET /usuarios deve retornar status 200', async () => {
     },
   });
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'usuario@exemplo.com',
+    '123456',
+  );
 
   const resposta = await app.inject({
     method: 'GET',
@@ -103,16 +99,11 @@ test('GET /usuarios deve aplicar paginação informada', async () => {
     },
   });
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'usuario7@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'usuario7@exemplo.com',
+    '123456',
+  );
 
   const resposta = await app.inject({
     method: 'GET',
@@ -303,16 +294,11 @@ test('PUT /usuarios/:id deve atualizar um usuário', async () => {
 
   const usuario = JSON.parse(criacao.body);
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'usuario@exemplo.com',
+    '123456',
+  );
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -355,16 +341,11 @@ test('PUT /usuarios/:id deve retornar 404 para usuário inexistente', async () =
     },
   });
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'usuario@exemplo.com',
+    '123456',
+  );
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -406,16 +387,11 @@ test('DELETE /usuarios/:id deve remover um usuário', async () => {
 
   const usuario = JSON.parse(criacao.body);
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'usuario@exemplo.com',
+    '123456',
+  );
 
   const resposta = await app.inject({
     method: 'DELETE',
@@ -452,16 +428,11 @@ test('DELETE /usuarios/:id deve retornar 404 para usuário inexistente', async (
     },
   });
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'usuario@exemplo.com',
+    '123456',
+  );
 
   const resposta = await app.inject({
     method: 'DELETE',
@@ -586,16 +557,11 @@ test('PUT /usuarios/:id deve permitir usuário atualizar a própria conta', asyn
 
   const usuarioCriado = JSON.parse(criacao.body);
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'usuario@exemplo.com',
+    '123456',
+  );
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -651,16 +617,11 @@ test('PUT /usuarios/:id não deve permitir usuario atualizar conta de outro usua
 
   const usuario2 = JSON.parse(criacaoUsuario2.body);
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'usuario1@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'usuario1@exemplo.com',
+    '123456',
+  );
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -713,16 +674,11 @@ test('DELETE /usuarios/:id não deve permitir usuario deletar conta de outro usu
 
   const usuario2 = JSON.parse(criacaoUsuario2.body);
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'usuario1@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'usuario1@exemplo.com',
+    '123456',
+  );
 
   const resposta = await app.inject({
     method: 'DELETE',
@@ -761,16 +717,11 @@ test('PUT /usuarios/:id admin pode alterar qualquer usuário', async () => {
 
   await usuariosRepository.atualizarRoleUsuario(usuarioAdmin.id, 'admin');
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'admin@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'admin@exemplo.com',
+    '123456',
+  );
 
   const criacaoUsuario = await app.inject({
     method: 'POST',
@@ -829,16 +780,11 @@ test('DELETE /usuarios/:id admin pode deletar qualquer usuário', async () => {
 
   await usuariosRepository.atualizarRoleUsuario(usuarioAdmin.id, 'admin');
 
-  const login = await app.inject({
-    method: 'POST',
-    url: '/login',
-    payload: {
-      email: 'admin@exemplo.com',
-      senha: '123456',
-    },
-  });
-
-  const { token } = JSON.parse(login.body);
+  const token = await autenticarUsuario(
+    app,
+    'admin@exemplo.com',
+    '123456',
+  );
 
   const criacaoUsuario = await app.inject({
     method: 'POST',
