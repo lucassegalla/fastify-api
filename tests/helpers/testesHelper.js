@@ -14,7 +14,15 @@ async function autenticarUsuario(app, email, senha) {
 }
 
 async function criarUsuario(app, dados) {
+  const resposta = await app.inject({
+    method: 'POST',
+    url: '/usuarios',
+    payload: dados,
+  });
 
+  const usuario = JSON.parse(resposta.body);
+
+  return usuario;
 }
 
 module.exports = {

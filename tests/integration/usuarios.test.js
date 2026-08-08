@@ -2,7 +2,7 @@ const { test, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
 const construirApp = require('../../app');
 const usuariosRepository = require('../../repositories/usuariosRepository');
-const { autenticarUsuario } = require('../helpers/testesHelper');
+const { autenticarUsuario, criarUsuario } = require('../helpers/testesHelper');
 
 const senhaTeste = '123456';
 const senhaHashTeste = 'hash_de_teste';
@@ -36,22 +36,14 @@ test('GET /usuarios deve retornar status 200', async () => {
     logger: false,
   });
 
-  await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome exemplo',
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-      idade: 24,
-    },
+  await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: senhaTeste,
+    idade: 25,
   });
 
-  const token = await autenticarUsuario(
-    app,
-    'usuario@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'usuario@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'GET',
@@ -88,22 +80,14 @@ test('GET /usuarios deve aplicar paginação informada', async () => {
     });
   }
 
-  await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo 7',
-      email: 'usuario7@exemplo.com',
-      senha: '123456',
-      idade: 27,
-    },
+  await criarUsuario(app, {
+    nome: 'Nome Exemplo 7',
+    email: 'usuario7@exemplo.com',
+    senha: '123456',
+    idade: 27,
   });
 
-  const token = await autenticarUsuario(
-    app,
-    'usuario7@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'usuario7@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'GET',
@@ -281,24 +265,14 @@ test('PUT /usuarios/:id deve atualizar um usuário', async () => {
     logger: false,
   });
 
-  const criacao = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo',
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-      idade: 20,
-    },
+  const usuario = await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
 
-  const usuario = JSON.parse(criacao.body);
-
-  const token = await autenticarUsuario(
-    app,
-    'usuario@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'usuario@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -330,22 +304,14 @@ test('PUT /usuarios/:id deve retornar 404 para usuário inexistente', async () =
     logger: false,
   });
 
-  const criacao = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo',
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-      idade: 20,
-    },
+  await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
 
-  const token = await autenticarUsuario(
-    app,
-    'usuario@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'usuario@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -374,24 +340,14 @@ test('DELETE /usuarios/:id deve remover um usuário', async () => {
     logger: false,
   });
 
-  const criacao = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo',
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-      idade: 20,
-    },
+  const usuario = await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
 
-  const usuario = JSON.parse(criacao.body);
-
-  const token = await autenticarUsuario(
-    app,
-    'usuario@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'usuario@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'DELETE',
@@ -417,22 +373,14 @@ test('DELETE /usuarios/:id deve retornar 404 para usuário inexistente', async (
     logger: false,
   });
 
-  await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo',
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-      idade: 20,
-    },
+  await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
 
-  const token = await autenticarUsuario(
-    app,
-    'usuario@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'usuario@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'DELETE',
@@ -523,6 +471,7 @@ test('POST /login deve retornar 401 para email inexistente', async () => {
   const app = construirApp({
     logger: false,
   });
+
   const resposta = await app.inject({
     method: 'POST',
     url: '/login',
@@ -531,6 +480,7 @@ test('POST /login deve retornar 401 para email inexistente', async () => {
       senha: senhaTeste,
     },
   });
+
   const body = JSON.parse(resposta.body);
 
   assert.equal(resposta.statusCode, 401);
@@ -544,24 +494,15 @@ test('PUT /usuarios/:id deve permitir usuário atualizar a própria conta', asyn
   const app = construirApp({
     logger: false,
   });
-  const criacao = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome exemplo',
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-      idade: 24,
-    },
+
+  const usuarioCriado = await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
 
-  const usuarioCriado = JSON.parse(criacao.body);
-
-  const token = await autenticarUsuario(
-    app,
-    'usuario@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'usuario@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -575,6 +516,7 @@ test('PUT /usuarios/:id deve permitir usuário atualizar a própria conta', asyn
       idade: 25,
     },
   });
+
   const body = JSON.parse(resposta.body);
 
   assert.equal(resposta.statusCode, 200);
@@ -591,37 +533,21 @@ test('PUT /usuarios/:id não deve permitir usuario atualizar conta de outro usua
     logger: false,
   });
 
-  const criacaoUsuario1 = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo 1',
-      email: 'usuario1@exemplo.com',
-      senha: '123456',
-      idade: 20,
-    },
+  await criarUsuario(app, {
+    nome: 'Nome Exemplo 1',
+    email: 'usuario1@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
 
-  const usuario1 = JSON.parse(criacaoUsuario1.body);
-
-  const criacaoUsuario2 = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo 2',
-      email: 'usuario2@exemplo.com',
-      senha: '123456',
-      idade: 21,
-    },
+  const usuario2 = await criarUsuario(app, {
+    nome: 'Nome Exemplo 2',
+    email: 'usuario2@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
 
-  const usuario2 = JSON.parse(criacaoUsuario2.body);
-
-  const token = await autenticarUsuario(
-    app,
-    'usuario1@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'usuario1@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -650,35 +576,21 @@ test('DELETE /usuarios/:id não deve permitir usuario deletar conta de outro usu
     logger: false,
   });
 
-  const criacaoUsuario1 = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo 1',
-      email: 'usuario1@exemplo.com',
-      senha: '123456',
-      idade: 20,
-    },
+  await criarUsuario(app, {
+    nome: 'Nome Exemplo 1',
+    email: 'usuario1@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
 
-  const criacaoUsuario2 = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo 2',
-      email: 'usuario2@exemplo.com',
-      senha: '123456',
-      idade: 21,
-    },
+  const usuario2 = await criarUsuario(app, {
+    nome: 'Nome Exemplo 2',
+    email: 'usuario2@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
 
-  const usuario2 = JSON.parse(criacaoUsuario2.body);
-
-  const token = await autenticarUsuario(
-    app,
-    'usuario1@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'usuario1@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'DELETE',
@@ -702,39 +614,23 @@ test('PUT /usuarios/:id admin pode alterar qualquer usuário', async () => {
     logger: false,
   });
 
-  const criacaoAdmin = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo',
-      email: 'admin@exemplo.com',
-      senha: '123456',
-      idade: 20,
-    },
+  const usuarioAdmin = await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'admin@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
-
-  const usuarioAdmin = JSON.parse(criacaoAdmin.body);
 
   await usuariosRepository.atualizarRoleUsuario(usuarioAdmin.id, 'admin');
 
-  const token = await autenticarUsuario(
-    app,
-    'admin@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'admin@exemplo.com', '123456');
 
-  const criacaoUsuario = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo',
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-      idade: 21,
-    },
+  const usuario = await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 21,
   });
-
-  const usuario = JSON.parse(criacaoUsuario.body);
 
   const resposta = await app.inject({
     method: 'PUT',
@@ -765,39 +661,23 @@ test('DELETE /usuarios/:id admin pode deletar qualquer usuário', async () => {
     logger: false,
   });
 
-  const criacaoAdmin = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo',
-      email: 'admin@exemplo.com',
-      senha: '123456',
-      idade: 20,
-    },
+  const usuarioAdmin = await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'admin@exemplo.com',
+    senha: '123456',
+    idade: 24,
   });
-
-  const usuarioAdmin = JSON.parse(criacaoAdmin.body);
 
   await usuariosRepository.atualizarRoleUsuario(usuarioAdmin.id, 'admin');
 
-  const token = await autenticarUsuario(
-    app,
-    'admin@exemplo.com',
-    '123456',
-  );
+  const token = await autenticarUsuario(app, 'admin@exemplo.com', '123456');
 
-  const criacaoUsuario = await app.inject({
-    method: 'POST',
-    url: '/usuarios',
-    payload: {
-      nome: 'Nome Exemplo',
-      email: 'usuario@exemplo.com',
-      senha: '123456',
-      idade: 21,
-    },
+  const usuario = await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 21,
   });
-
-  const usuario = JSON.parse(criacaoUsuario.body);
 
   const resposta = await app.inject({
     method: 'DELETE',
