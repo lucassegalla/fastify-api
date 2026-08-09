@@ -1,3 +1,5 @@
+const errorSchema = require('./errorSchema');
+
 //SCHEMAS REUTILIZÁVEIS
 
 const usuarioSchema = {
@@ -76,26 +78,6 @@ const usuarioAtualizacaoBodySchema = {
   },
 };
 
-const errorSchema = {
-  type: 'object',
-  additionalProperties: false,
-  required: ['statusCode', 'error', 'message'],
-  properties: {
-    statusCode: {
-      type: 'integer',
-      description: 'Código HTTP da resposta',
-    },
-    error: {
-      type: 'string',
-      description: 'Nome do erro',
-    },
-    message: {
-      type: 'string',
-      description: 'Descrição do erro',
-    },
-  },
-};
-
 const usuarioIdParamsSchema = {
   type: 'object',
   additionalProperties: false,
@@ -155,6 +137,11 @@ const listarUsuariosSchema = {
   summary: 'Listar usuários',
   description: 'Retorna uma lista paginada de usuários',
   tags: ['Usuários'],
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   querystring: {
     type: 'object',
     additionalProperties: false,
@@ -175,6 +162,7 @@ const listarUsuariosSchema = {
   response: {
     200: paginacaoUsuariosSchema,
     400: errorSchema,
+    401: errorSchema,
   },
 };
 
@@ -182,9 +170,16 @@ const buscarUsuarioPorIdSchema = {
   summary: 'Buscar usuário por ID',
   description: 'Retorna um usuário a partir do seu identificador',
   tags: ['Usuários'],
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   params: usuarioIdParamsSchema,
   response: {
     200: usuarioSchema,
+    401: errorSchema,
+    403: errorSchema,
     404: errorSchema,
   },
 };
@@ -204,11 +199,18 @@ const atualizarUsuarioSchema = {
   summary: 'Atualizar usuário',
   description: 'Atualiza os dados de um usuário existente',
   tags: ['Usuários'],
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   params: usuarioIdParamsSchema,
   body: usuarioAtualizacaoBodySchema,
   response: {
     200: usuarioSchema,
     400: errorSchema,
+    401: errorSchema,
+    403: errorSchema,
     404: errorSchema,
   },
 };
@@ -217,12 +219,19 @@ const removerUsuarioPorIdSchema = {
   summary: 'Remover usuário',
   description: 'Remove um usuário a partir do seu identificador',
   tags: ['Usuários'],
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   params: usuarioIdParamsSchema,
   response: {
     204: {
       type: 'null',
       description: 'Usuário removido com sucesso',
     },
+    401: errorSchema,
+    403: errorSchema,
     404: errorSchema,
   },
 };

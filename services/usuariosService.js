@@ -67,6 +67,14 @@ async function buscarUsuarioPorId(id) {
   return usuario;
 }
 
+async function buscarUsuarioAutorizado(id, usuarioAutenticado) {
+  const usuario = await buscarUsuarioPorId(id);
+
+  validarPermissao(id, usuarioAutenticado);
+
+  return usuario;
+}
+
 async function atualizarUsuario(id, dadosAtualizados, usuarioAutenticado) {
   await buscarUsuarioPorId(id);
 
@@ -97,6 +105,7 @@ module.exports = {
   listarUsuarios,
   criarUsuario,
   buscarUsuarioPorId,
+  buscarUsuarioAutorizado,
   atualizarUsuario,
   removerUsuario,
 };

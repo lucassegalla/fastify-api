@@ -217,16 +217,21 @@ test('GET /usuarios/:id deve retornar um usuário', async () => {
     logger: false,
   });
 
-  const usuario = await usuariosRepository.criarUsuario({
+  const usuario = await criarUsuario(app, {
     nome: 'Nome Exemplo',
     email: 'usuario@exemplo.com',
-    senha_hash: senhaHashTeste,
+    senha: '123456',
     idade: 24,
   });
+
+  const token = await autenticarUsuario(app, 'usuario@exemplo.com', '123456');
 
   const resposta = await app.inject({
     method: 'GET',
     url: `/usuarios/${usuario.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
   });
 
   const body = JSON.parse(resposta.body);
@@ -246,9 +251,21 @@ test('GET /usuarios/:id deve retornar 404 para usuário inexistente', async () =
     logger: false,
   });
 
+  await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 24,
+  });
+
+  const token = await autenticarUsuario(app, 'usuario@exemplo.com', '123456');
+
   const resposta = await app.inject({
     method: 'GET',
     url: '/usuarios/999',
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
   });
 
   const body = JSON.parse(resposta.body);
@@ -693,6 +710,116 @@ test('DELETE /usuarios/:id admin pode deletar qualquer usuário', async () => {
 
   assert.equal(resposta.statusCode, 204);
   assert.equal(usuarioRemovido, undefined);
+
+  await app.close();
+});
+
+test('GET /usuarios/:id deve permitir usuário buscar a própria conta', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const usuario = await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 24,
+  });
+
+  const token = await autenticarUsuario(app, 'usuario@exemplo.com', '123456');
+
+  const resposta = await app.inject({
+    method: 'GET',
+    url: `/usuarios/${usuario.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+  assert.equal(body.id, usuario.id);
+  assert.equal(body.nome, 'Nome Exemplo');
+
+  await app.close();
+});
+
+test('GET /usuarios/:id não deve permitir usuário buscar conta de outro usuário', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  await criarUsuario(app, {
+    nome: 'Nome Exemplo 1',
+    email: 'usuario1@exemplo.com',
+    senha: '123456',
+    idade: 20,
+  });
+
+  const usuario2 = await criarUsuario(app, {
+    nome: 'Nome Exemplo 2',
+    email: 'usuario2@exemplo.com',
+    senha: '123456',
+    idade: 21,
+  });
+
+  const token = await autenticarUsuario(app, 'usuario1@exemplo.com', '123456');
+
+  const resposta = await app.inject({
+    method: 'GET',
+    url: `/usuarios/${usuario2.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 403);
+  assert.equal(body.error, 'Forbidden');
+  assert.equal(body.message, 'Acesso negado');
+
+  await app.close();
+});
+
+test('GET /usuarios/:id admin pode buscar qualquer usuário', async () => {
+  const app = construirApp({
+    logger: false,
+  });
+
+  const usuarioAdmin = await criarUsuario(app, {
+    nome: 'Nome Exemplo',
+    email: 'admin@exemplo.com',
+    senha: '123456',
+    idade: 24,
+  });
+
+  await usuariosRepository.atualizarRoleUsuario(usuarioAdmin.id, 'admin');
+
+  const token = await autenticarUsuario(app, 'admin@exemplo.com', '123456');
+
+  const usuario = await criarUsuario(app, {
+    nome: 'Nome Exemplo 2',
+    email: 'usuario@exemplo.com',
+    senha: '123456',
+    idade: 21,
+  });
+
+  const resposta = await app.inject({
+    method: 'GET',
+    url: `/usuarios/${usuario.id}`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+
+  const body = JSON.parse(resposta.body);
+
+  assert.equal(resposta.statusCode, 200);
+  assert.equal(body.id, usuario.id);
+  assert.equal(body.nome, 'Nome Exemplo 2');
+  assert.equal(body.email, 'usuario@exemplo.com');
 
   await app.close();
 });

@@ -8,10 +8,12 @@ Projeto criado com o objetivo de estudar os fundamentos do Node.js, aprofundar o
 
 ## Tecnologias Utilizadas
 
-- **JavaScript**
+- **JavaScript** - Linguagem utilizada no desenvolvimento da aplicação
 - **Node.js** - Ambiente de execução JavaScript
 - **Fastify** - Framework para construção da API REST
 - **PostgreSQL** - Sistema de gerenciamento de banco de dados relacional
+- **JWT** - Autenticação baseada em tokens
+- **bcrypt** - Hash e verificação segura de senhas
 - **OpenAPI (Swagger)** - Documentação automática da API
 
 ## Arquitetura
@@ -65,6 +67,7 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 ├── controllers/
 ├── database/
 ├── errors/
+├── middlewares/
 ├── repositories/
 ├── routes/
 ├── schemas/
@@ -90,8 +93,12 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 - Validação de requisições com JSON Schema
 - Tratamento centralizado de erros
 - Normalização de dados antes da persistência
-- Documentação automática com OpenAPI (Swagger)
-- Testes de integração
+- Hash de senhas com bcrypt
+- Autenticação baseada em JWT
+- Autorização baseada em usuário e administrador
+- Documentação interativa com OpenAPI (Swagger)
+- Testes automatizados de integração
+- Banco de dados isolado para o ambiente de testes
 
 ## Como executar
 
@@ -109,7 +116,7 @@ npm install
 
 ### 3. Configurar as variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto e defina as seguintes variáveis:
+Crie um arquivo `.env` na raiz do projeto e configure as variáveis de ambiente utilizadas pela aplicação:
 
 ```env
 PORT=3000
@@ -118,6 +125,7 @@ DB_PORT=5432
 DB_NAME=seu_banco
 DB_USER=seu_usuario
 DB_PASSWORD=sua_senha
+JWT_SECRET=sua_chave_secreta
 ```
 
 ### 4. Iniciar a aplicação
@@ -130,9 +138,19 @@ npm start
 
 O projeto possui testes de integração utilizando o módulo nativo `node:test` e o método `fastify.inject()`, permitindo validar o comportamento da API sem a necessidade de iniciar um servidor HTTP
 
-Para executá-los, crie um segundo banco de dados destinado exclusivamente ao ambiente de testes e configure suas credenciais no arquivo `.env.test`.
+Os testes utilizam um banco de dados separado do ambiente de desenvolvimento para garantir o isolamento dos dados
 
-Para executar os testes:
+Crie um arquivo `.env.test` na raiz do projeto com as configurações do banco destinado exclusivamente aos testes:
+
+```env
+PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=seu_banco_de_testes
+DB_USER=seu_usuario
+DB_PASSWORD=sua_senha
+JWT_SECRET=sua_chave_secreta_de_teste
+```
 
 ```bash
 npm test
@@ -150,14 +168,15 @@ A documentação é gerada automaticamente a partir dos JSON Schemas definidos n
 
 ## Endpoints
 
-| Método   | Endpoint        | Status | Descrição                          |
-| :------- | :-------------- | :----: | :--------------------------------- |
-| `GET`    | `/`             | `200`  | Verifica se a API está em execução |
-| `GET`    | `/usuarios`     | `200`  | Lista os usuários cadastrados      |
-| `GET`    | `/usuarios/:id` | `200`  | Busca um usuário pelo ID           |
-| `POST`   | `/usuarios`     | `201`  | Cria um novo usuário               |
-| `PUT`    | `/usuarios/:id` | `200`  | Atualiza um usuário existente      |
-| `DELETE` | `/usuarios/:id` | `204`  | Remove um usuário                  |
+| Método   | Endpoint        | Autenticação | Status | Descrição                          |
+| :------- | :-------------- | :----------: | :----: | :--------------------------------- |
+| `GET`    | `/`             |     Não      | `200`  | Verifica se a API está em execução |
+| `POST`   | `/login`        |     Não      | `200`  | Autentica um usuário e retorna JWT |
+| `POST`   | `/usuarios`     |     Não      | `201`  | Cria um novo usuário               |
+| `GET`    | `/usuarios`     |     JWT      | `200`  | Lista os usuários cadastrados      |
+| `GET`    | `/usuarios/:id` |     JWT      | `200`  | Busca um usuário pelo ID           |
+| `PUT`    | `/usuarios/:id` |     JWT      | `200`  | Atualiza um usuário existente      |
+| `DELETE` | `/usuarios/:id` |     JWT      | `204`  | Remove um usuário                  |
 
 ## Roadmap
 
@@ -173,10 +192,10 @@ A documentação é gerada automaticamente a partir dos JSON Schemas definidos n
 - [x] Paginação
 - [x] Testes automatizados
 - [x] Documentação da API (Swagger/OpenAPI)
+- [x] Autenticação e autorização (JWT)
 
 ### Próximos passos
 
-- [ ] Autenticação e autorização (JWT)
 - [ ] Docker
 - [ ] Docker Compose
 - [ ] CI/CD

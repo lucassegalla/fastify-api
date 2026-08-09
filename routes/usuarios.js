@@ -12,16 +12,13 @@ const {
 async function usuariosRoutes(fastify) {
   fastify.get(
     '/usuarios',
-    {
-      preHandler: autenticar,
-      schema: listarUsuariosSchema,
-    },
+    { schema: listarUsuariosSchema, preHandler: autenticar },
     usuariosController.listarUsuarios,
   );
 
   fastify.get(
     '/usuarios/:id',
-    { schema: buscarUsuarioPorIdSchema },
+    { schema: buscarUsuarioPorIdSchema, preHandler: autenticar },
     usuariosController.buscarUsuarioPorId,
   );
 
@@ -33,19 +30,13 @@ async function usuariosRoutes(fastify) {
 
   fastify.put(
     '/usuarios/:id',
-    {
-      preHandler: autenticar,
-      schema: atualizarUsuarioSchema,
-    },
+    { schema: atualizarUsuarioSchema, preHandler: autenticar },
     usuariosController.atualizarUsuario,
   );
 
   fastify.delete(
     '/usuarios/:id',
-    {
-      preHandler: autenticar,
-      schema: removerUsuarioPorIdSchema,
-    },
+    { schema: removerUsuarioPorIdSchema, preHandler: autenticar },
     usuariosController.removerUsuario,
   );
 }

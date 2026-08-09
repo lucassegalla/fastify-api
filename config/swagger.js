@@ -11,6 +11,15 @@ async function configurarSwagger(fastify) {
           'API REST desenvolvida para estudos com Node.js, Fastify e PostgreSQL.',
         version: '1.0.0',
       },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
     },
   });
 

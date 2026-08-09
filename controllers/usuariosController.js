@@ -21,7 +21,10 @@ async function criarUsuario(request, reply) {
 async function buscarUsuarioPorId(request, reply) {
   const id = Number(request.params.id);
 
-  const usuario = await usuariosService.buscarUsuarioPorId(id);
+  const usuario = await usuariosService.buscarUsuarioAutorizado(
+    id,
+    request.user,
+  );
 
   return reply.code(200).send(usuario);
 }
