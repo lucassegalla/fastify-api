@@ -15,6 +15,8 @@ Projeto criado com o objetivo de estudar os fundamentos do Node.js, aprofundar o
 - **JWT** - Autenticação baseada em tokens
 - **bcrypt** - Hash e verificação segura de senhas
 - **OpenAPI (Swagger)** - Documentação automática da API
+- **Docker** - Containerização da aplicação
+- **Docker Compose** - Orquestração dos containers da API e dos bancos de dados
 
 ## Arquitetura
 
@@ -73,6 +75,9 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 ├── schemas/
 ├── services/
 ├── tests/
+├── .dockerignore
+├── Dockerfile
+├── docker-compose.yml
 ├── app.js
 └── server.js
 ```
@@ -102,19 +107,73 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 
 ## Como executar
 
-### 1. Clonar o repositório
+A aplicação pode ser executada utilizando Docker ou localmente
+
+### Docker
+
+#### 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/lucassegalla/fastify-api-basics.git
 ```
 
-### 2. Instalar dependências
+#### 2. Instalar o Docker
+
+Certifique-se de que o Docker e o Docker Compose estão instalados e em execução.
+
+#### 3. Configurar as variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+PORT=3000
+DB_HOST=db
+DB_PORT=5432
+DB_NAME=fastify_api
+DB_USER=postgres
+DB_PASSWORD=sua_senha
+JWT_SECRET=sua_chave_secreta
+```
+
+#### 4. Iniciar os containers
+
+Execute:
+
+```bash
+docker compose up --build
+```
+
+O Docker Compose irá criar e iniciar a API e o banco de dados PostgreSQL.
+
+A API estará disponível em:
+
+```text
+http://localhost:3000
+```
+
+#### 5. Encerrar os containers
+
+Execute:
+
+```bash
+docker compose down
+```
+
+### Ambiente local
+
+#### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/lucassegalla/fastify-api-basics.git
+```
+
+#### 2. Instalar dependências
 
 ```bash
 npm install
 ```
 
-### 3. Configurar as variáveis de ambiente
+#### 3. Configurar as variáveis de ambiente
 
 Crie um arquivo `.env` na raiz do projeto e configure as variáveis de ambiente utilizadas pela aplicação:
 
@@ -128,7 +187,7 @@ DB_PASSWORD=sua_senha
 JWT_SECRET=sua_chave_secreta
 ```
 
-### 4. Iniciar a aplicação
+#### 4. Iniciar a aplicação
 
 ```bash
 npm start
@@ -140,17 +199,31 @@ O projeto possui testes de integração utilizando o módulo nativo `node:test` 
 
 Os testes utilizam um banco de dados separado do ambiente de desenvolvimento para garantir o isolamento dos dados
 
-Crie um arquivo `.env.test` na raiz do projeto com as configurações do banco destinado exclusivamente aos testes:
+### Executando os testes com Docker
+
+Os testes podem ser executados em um ambiente isolado utilizando um banco PostgreSQL exclusivo para testes:
+
+```bash
+docker compose run --rm test
+```
+
+O Docker Compose inicia o banco de testes, aguarda até que ele esteja disponível e executa a suíte de testes em um container separado.
+
+### Executando os testes localmente
+
+Para executar os testes fora do Docker, crie um arquivo `.env.test` na raiz do projeto:
 
 ```env
 PORT=3000
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=seu_banco_de_testes
-DB_USER=seu_usuario
+DB_NAME=fastify_api_test
+DB_USER=postgres
 DB_PASSWORD=sua_senha
 JWT_SECRET=sua_chave_secreta_de_teste
 ```
+
+Certifique-se de que o banco de testes esteja disponível e execute:
 
 ```bash
 npm test
@@ -193,11 +266,11 @@ A documentação é gerada automaticamente a partir dos JSON Schemas definidos n
 - [x] Testes automatizados
 - [x] Documentação da API (Swagger/OpenAPI)
 - [x] Autenticação e autorização (JWT)
+- [x] Docker
+- [x] Docker Compose
 
 ### Próximos passos
 
-- [ ] Docker
-- [ ] Docker Compose
 - [ ] CI/CD
 - [ ] Deploy em Cloud
 - [ ] Frontend para demonstração
