@@ -17,6 +17,7 @@ Projeto criado com o objetivo de estudar os fundamentos do Node.js, aprofundar o
 - **OpenAPI (Swagger)** - Documentação automática da API
 - **Docker** - Containerização da aplicação
 - **Docker Compose** - Orquestração dos containers da API e dos bancos de dados
+- **GitHub Actions** - Integração contínua e execução automatizada dos testes
 
 ## Arquitetura
 
@@ -104,6 +105,7 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 - Documentação interativa com OpenAPI (Swagger)
 - Testes automatizados de integração
 - Banco de dados isolado para o ambiente de testes
+- Integração contínua com execução automática dos testes no GitHub Actions
 
 ## Como executar
 
@@ -229,6 +231,26 @@ Certifique-se de que o banco de testes esteja disponível e execute:
 npm test
 ```
 
+## Integração Contínua
+
+O projeto utiliza GitHub Actions para executar automaticamente os testes de integração e validar alterações no código
+
+O workflow de CI é executado nos seguintes eventos:
+
+- Push para a branch `main`
+- Pull request direcionado para a branch `main`
+
+Durante a execução, o GitHub Actions:
+
+1. Prepara um ambiente Ubuntu
+2. Configura o Node.js
+3. Instala as dependências do projeto
+4. Inicializa um banco PostgreSQL exclusivo para testes
+5. Cria a estrutura necessária do banco de dados
+6. Executa a suíte de testes automatizados
+
+Caso algum teste falhe, o workflow é marcado como falho, permitindo identificar problemas antes que novas alterações sejam integradas ao projeto.
+
 ## Documentação da API
 
 Após iniciar a aplicação, a documentação interativa estará disponível em:
@@ -268,10 +290,11 @@ A documentação é gerada automaticamente a partir dos JSON Schemas definidos n
 - [x] Autenticação e autorização (JWT)
 - [x] Docker
 - [x] Docker Compose
+- [x] CI com GitHub Actions
 
 ### Próximos passos
 
-- [ ] CI/CD
+- [ ] CD
 - [ ] Deploy em Cloud
 - [ ] Frontend para demonstração
 
