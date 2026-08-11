@@ -279,12 +279,31 @@ A infraestrutura do ambiente publicado é composta por:
 - Banco de dados PostgreSQL gerenciado pelo Render
 - Variáveis de ambiente configuradas diretamente na plataforma
 
+### Deploy contínuo
+
+O deploy da aplicação é realizado automaticamente pelo Render após a conclusão bem-sucedida dos checks de CI executados pelo GitHub Actions
+
+O fluxo de CI/CD segue a seguinte sequência:
+
+1. Um novo commit é enviado para a branch `main`
+2. O GitHub Actions executa a suíte de testes
+3. Caso todos os testes sejam aprovados, o Render inicia automaticamente um novo deploy
+4. A nova versão da aplicação é publicada
+
+Caso os testes falhem, o deploy não é iniciado
+
 ## Documentação da API
 
-Após iniciar a aplicação, a documentação interativa estará disponível em:
+Após iniciar a aplicação localmente, a documentação interativa estará disponível em:
 
 ```text
 http://localhost:3000/docs
+```
+
+A documentação da versão publicada também pode ser acessada em:
+
+```text
+https://fastify-api-basics.onrender.com/docs
 ```
 
 A documentação é gerada automaticamente a partir dos JSON Schemas definidos na aplicação utilizando OpenAPI (Swagger)
@@ -320,10 +339,10 @@ A documentação é gerada automaticamente a partir dos JSON Schemas definidos n
 - [x] Docker Compose
 - [x] CI com GitHub Actions
 - [x] Deploy em Cloud com Render
+- [x] CD
 
 ### Próximos passos
 
-- [ ] CD
 - [ ] Deploy em Cloud com AWS
 - [ ] Frontend para demonstração
 
