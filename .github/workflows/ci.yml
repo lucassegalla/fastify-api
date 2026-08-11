@@ -14,7 +14,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17
+        image: postgres:18
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: 123456
@@ -35,6 +35,7 @@ jobs:
       DB_USER: postgres
       DB_PASSWORD: 123456
       JWT_SECRET: chave_secreta_teste
+      DB_SSL: false
 
     steps:
       - name: Checkout repository
@@ -43,7 +44,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
