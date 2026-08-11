@@ -1,10 +1,10 @@
 # Fastify API Basics
 
-API REST desenvolvida com foco em arquitetura em camadas, validação de dados e boas práticas de desenvolvimento backend.
+API REST desenvolvida com foco em arquitetura em camadas, validação de dados e boas práticas de desenvolvimento backend
 
 ## Objetivo
 
-Projeto criado com o objetivo de estudar os fundamentos do Node.js, aprofundar os conhecimentos em desenvolvimento backend e demonstrar a evolução na construção de uma API REST seguindo boas práticas de arquitetura, organização em camadas e desenvolvimento de software, também servindo como uma referência prática para consultas futuras.
+Projeto criado com o objetivo de estudar os fundamentos do Node.js, aprofundar os conhecimentos em desenvolvimento backend e demonstrar a evolução na construção de uma API REST seguindo boas práticas de arquitetura, organização em camadas e desenvolvimento de software, também servindo como uma referência prática para consultas futuras
 
 ## Tecnologias Utilizadas
 
@@ -18,10 +18,11 @@ Projeto criado com o objetivo de estudar os fundamentos do Node.js, aprofundar o
 - **Docker** - Containerização da aplicação
 - **Docker Compose** - Orquestração dos containers da API e dos bancos de dados
 - **GitHub Actions** - Integração contínua e execução automatizada dos testes
+- **Render** - Hospedagem da aplicação e do banco de dados PostgreSQL em cloud
 
 ## Arquitetura
 
-Aplicação desenvolvida seguindo uma arquitetura em camadas, cada uma possuindo sua responsabilidade específica, facilitando manutenção, testes e evolução do projeto.
+Aplicação desenvolvida seguindo uma arquitetura em camadas, cada uma possuindo sua responsabilidade específica, facilitando manutenção, testes e evolução do projeto
 
 ```text
 Cliente HTTP
@@ -44,31 +45,37 @@ PostgreSQL
 
 ### Fastify
 
-Framework responsável por receber as requisições HTTP, realizar o roteamento, executar as validações definidas pelos JSON Schemas e encaminhar a requisição para o Controller correspondente.
+Framework responsável por receber as requisições HTTP, realizar o roteamento, executar as validações definidas pelos JSON Schemas e encaminhar a requisição para o Controller correspondente
 
 ### Controller
 
-Recebe as requisições HTTP, extrai os dados da requisição, delega o processamento para a camada de Service e retorna a resposta ao cliente.
+Recebe as requisições HTTP, extrai os dados da requisição, delega o processamento para a camada de Service e retorna a resposta ao cliente
 
 ### Service
 
-Implementa as regras de negócio da aplicação, realiza validações complementares, trata os dados antes da persistência e coordena a comunicação com a camada de Repository.
+Implementa as regras de negócio da aplicação, realiza validações complementares, trata os dados antes da persistência e coordena a comunicação com a camada de Repository
 
 ### Repository
 
-Centraliza o acesso ao banco de dados, executando consultas SQL e abstraindo a camada de persistência da aplicação.
+Centraliza o acesso ao banco de dados, executando consultas SQL e abstraindo a camada de persistência da aplicação
 
 ### PostgreSQL
 
-Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e gerenciar os dados da aplicação de forma persistente.
+Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e gerenciar os dados da aplicação de forma persistente
 
 ## Estrutura do Projeto
 
 ```text
 .
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── config/
 ├── controllers/
 ├── database/
+│   ├── connection.js
+│   └── init/
+│       └── 01-create-usuarios.sql
 ├── errors/
 ├── middlewares/
 ├── repositories/
@@ -76,10 +83,16 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 ├── schemas/
 ├── services/
 ├── tests/
+│   ├── helpers/
+│   └── integration/
 ├── .dockerignore
+├── .gitignore
 ├── Dockerfile
 ├── docker-compose.yml
 ├── app.js
+├── package.json
+├── package-lock.json
+├── README.md
 └── server.js
 ```
 
@@ -121,7 +134,7 @@ git clone https://github.com/lucassegalla/fastify-api-basics.git
 
 #### 2. Instalar o Docker
 
-Certifique-se de que o Docker e o Docker Compose estão instalados e em execução.
+Certifique-se de que o Docker e o Docker Compose estão instalados e em execução
 
 #### 3. Configurar as variáveis de ambiente
 
@@ -145,7 +158,7 @@ Execute:
 docker compose up --build
 ```
 
-O Docker Compose irá criar e iniciar a API e o banco de dados PostgreSQL.
+O Docker Compose irá criar e iniciar a API e o banco de dados PostgreSQL
 
 A API estará disponível em:
 
@@ -209,7 +222,7 @@ Os testes podem ser executados em um ambiente isolado utilizando um banco Postgr
 docker compose run --rm test
 ```
 
-O Docker Compose inicia o banco de testes, aguarda até que ele esteja disponível e executa a suíte de testes em um container separado.
+O Docker Compose inicia o banco de testes, aguarda até que ele esteja disponível e executa a suíte de testes em um container separado
 
 ### Executando os testes localmente
 
@@ -249,7 +262,22 @@ Durante a execução, o GitHub Actions:
 5. Cria a estrutura necessária do banco de dados
 6. Executa a suíte de testes automatizados
 
-Caso algum teste falhe, o workflow é marcado como falho, permitindo identificar problemas antes que novas alterações sejam integradas ao projeto.
+Caso algum teste falhe, o workflow é marcado como falho, permitindo identificar problemas antes que novas alterações sejam integradas ao projeto
+
+## Deploy
+
+A aplicação está publicada no Render utilizando Docker, com um banco de dados PostgreSQL gerenciado na mesma plataforma
+
+A API está disponível publicamente em:
+
+https://fastify-api-basics.onrender.com
+
+A infraestrutura do ambiente publicado é composta por:
+
+- Web Service responsável pela execução da API
+- Imagem Docker construída a partir do `Dockerfile` do projeto
+- Banco de dados PostgreSQL gerenciado pelo Render
+- Variáveis de ambiente configuradas diretamente na plataforma
 
 ## Documentação da API
 
@@ -259,7 +287,7 @@ Após iniciar a aplicação, a documentação interativa estará disponível em:
 http://localhost:3000/docs
 ```
 
-A documentação é gerada automaticamente a partir dos JSON Schemas definidos na aplicação utilizando OpenAPI (Swagger).
+A documentação é gerada automaticamente a partir dos JSON Schemas definidos na aplicação utilizando OpenAPI (Swagger)
 
 ## Endpoints
 
@@ -291,11 +319,12 @@ A documentação é gerada automaticamente a partir dos JSON Schemas definidos n
 - [x] Docker
 - [x] Docker Compose
 - [x] CI com GitHub Actions
+- [x] Deploy em Cloud com Render
 
 ### Próximos passos
 
 - [ ] CD
-- [ ] Deploy em Cloud
+- [ ] Deploy em Cloud com AWS
 - [ ] Frontend para demonstração
 
 ## Autor
