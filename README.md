@@ -74,15 +74,12 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 .
 ├── .github/
 │   └── workflows/
-│       └── ci.yml
 ├── config/
 ├── controllers/
 ├── database/
 │   ├── connection.js
 │   ├── init/
-│   │   └── 01-create-usuarios.sql
 │   ├── migrations/
-│   │   └── 001-create-usuarios.sql
 │   └── migrate.js
 ├── errors/
 ├── middlewares/
