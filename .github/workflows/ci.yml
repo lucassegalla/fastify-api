@@ -88,3 +88,16 @@ jobs:
 
       - name: Push Docker image to ECR
         run: docker push 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api-basics:latest
+
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster fastify-api-cluster \
+            --service fastify-api-service \
+            --force-new-deployment
+
+      - name: Wait for ECS service stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster fastify-api-cluster \
+            --services fastify-api-service
