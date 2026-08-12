@@ -1,79 +1,68 @@
 # Fastify API Basics
 
-API REST desenvolvida com foco em arquitetura em camadas, validação de dados, segurança, testes automatizados, containerização e deploy em cloud.
+API REST desenvolvida com Node.js, Fastify e PostgreSQL, com foco em fundamentos de backend, organização em camadas, segurança, testes, containerização e deploy em cloud.
 
 ## Objetivo
 
-Projeto criado com o objetivo de estudar os fundamentos do Node.js, aprofundar os conhecimentos em desenvolvimento backend e demonstrar a evolução na construção de uma API REST seguindo boas práticas de arquitetura, organização em camadas e desenvolvimento de software, também servindo como uma referência prática para consultas futuras.
+Este projeto começou como uma API CRUD para praticar os fundamentos do Node.js e foi evoluindo conforme novos conceitos de backend foram sendo estudados.
 
-## Tecnologias Utilizadas
+Além das operações básicas da API, o projeto passou a incluir autenticação, autorização, testes de integração, documentação, Docker, migrations e um fluxo de CI/CD com deploy em Render e AWS. A ideia é manter o repositório como referência prática para estudos futuros.
 
-- **JavaScript** - Linguagem utilizada no desenvolvimento da aplicação
+## Tecnologias utilizadas
+
+- **JavaScript** - Linguagem utilizada na aplicação
 - **Node.js** - Ambiente de execução JavaScript
-- **Fastify** - Framework para construção da API REST
-- **PostgreSQL** - Sistema de gerenciamento de banco de dados relacional
+- **Fastify** - Framework utilizado para construir a API REST
+- **PostgreSQL** - Banco de dados relacional
+- **pg** - Driver utilizado para comunicação com PostgreSQL
 - **JWT** - Autenticação baseada em tokens
-- **bcrypt** - Hash e verificação segura de senhas
-- **OpenAPI (Swagger)** - Documentação automática da API
+- **bcrypt** - Hash e verificação de senhas
+- **JSON Schema** - Validação das requisições e respostas
+- **OpenAPI / Swagger** - Documentação interativa da API
+- **node:test** - Testes automatizados de integração
 - **Docker** - Containerização da aplicação
-- **Docker Compose** - Orquestração dos containers da API e dos bancos de dados
-- **GitHub Actions** - Integração contínua e execução automatizada dos testes
-- **Render** - Ambiente de deploy em cloud com integração contínua
-- **Amazon ECR** - Registro de imagens Docker
-- **Amazon ECS com AWS Fargate** - Execução da aplicação containerizada na AWS
-- **Amazon RDS** - Banco PostgreSQL gerenciado na AWS
-- **AWS Systems Manager Parameter Store** - Armazenamento seguro de credenciais e secrets
-- **Amazon CloudWatch** - Centralização dos logs da aplicação executada no ECS
+- **Docker Compose** - Ambiente local e banco isolado para testes
+- **GitHub Actions** - CI/CD do projeto
+- **Render** - Ambiente de deploy em cloud
+- **Amazon ECR** - Registro das imagens Docker na AWS
+- **Amazon ECS + AWS Fargate** - Execução da API containerizada na AWS
+- **Application Load Balancer (ALB)** - Ponto de entrada público e distribuição do tráfego para as tasks da aplicação
+- **Amazon RDS** - PostgreSQL gerenciado na AWS
+- **AWS Systems Manager Parameter Store** - Armazenamento de secrets utilizados pelas tasks
+- **Amazon CloudWatch** - Logs dos containers executados no ECS
+- **AWS IAM, STS e OIDC** - Autenticação do GitHub Actions na AWS utilizando credenciais temporárias
 
 ## Arquitetura
 
-A aplicação foi desenvolvida seguindo uma arquitetura em camadas, cada uma possuindo sua responsabilidade específica, facilitando manutenção, testes e evolução do projeto.
+A aplicação foi organizada em camadas para separar as responsabilidades e evitar que regras de negócio, acesso ao banco e tratamento HTTP fiquem misturados.
 
-```text
-Cliente HTTP
-    |
-    ▼
-Fastify
-    |
-    ▼
-Controller
-    |
-    ▼
-Service
-    |
-    ▼
-Repository
-    |
-    ▼
-PostgreSQL
-```
+### Routes
 
-### Fastify
+Definem os endpoints da API, os schemas utilizados em cada rota e os middlewares necessários.
 
-Framework responsável por receber as requisições HTTP, realizar o roteamento, executar as validações definidas pelos JSON Schemas e encaminhar a requisição para o Controller correspondente.
+### Controllers
 
-### Controller
+Recebem as requisições HTTP, extraem os dados necessários e encaminham o processamento para os services.
 
-Recebe as requisições HTTP, extrai os dados da requisição, delega o processamento para a camada de Service e retorna a resposta ao cliente.
+### Services
 
-### Service
+Concentram as regras de negócio da aplicação, como normalização de dados, hash de senha, autorização e tratamento de usuários inexistentes.
 
-Implementa as regras de negócio da aplicação, realiza validações complementares, trata os dados antes da persistência e coordena a comunicação com a camada de Repository.
+### Repositories
 
-### Repository
+Centralizam as consultas SQL e o acesso ao PostgreSQL.
 
-Centraliza o acesso ao banco de dados, executando consultas SQL e abstraindo a camada de persistência da aplicação.
+### Schemas
 
-### PostgreSQL
+Definem a validação das entradas e respostas da API utilizando JSON Schema. Esses mesmos schemas também são utilizados para gerar a documentação OpenAPI.
 
-Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e gerenciar os dados da aplicação de forma persistente.
-
-## Estrutura do Projeto
+## Estrutura do projeto
 
 ```text
 .
 ├── .github/
 │   └── workflows/
+│       └── ci.yml
 ├── config/
 ├── controllers/
 ├── database/
@@ -103,35 +92,42 @@ Sistema de gerenciamento de banco de dados relacional utilizado para armazenar e
 
 ## Funcionalidades
 
-### Gerenciamento de usuários
+### Usuários
 
-- Criar usuários
-- Listar usuários
-- Buscar usuários por ID
-- Atualizar usuários
-- Remover usuários
+- Criação de usuários
+- Listagem paginada
+- Busca por ID
+- Atualização de dados
+- Remoção de usuários
+- Normalização do nome antes da persistência
+- Senhas armazenadas utilizando hash com bcrypt
 
-### Recursos da API
+### Autenticação e autorização
 
-- Paginação de resultados
-- Validação de requisições com JSON Schema
-- Tratamento centralizado de erros
-- Normalização de dados antes da persistência
-- Hash de senhas com bcrypt
-- Autenticação baseada em JWT
-- Autorização baseada em usuário e administrador
-- Documentação interativa com OpenAPI (Swagger)
-- Testes automatizados de integração
-- Banco de dados isolado para o ambiente de testes
-- Migrations para gerenciamento da estrutura do banco
-- Suporte a conexão PostgreSQL com SSL/TLS
-- Integração contínua com GitHub Actions
-- Containerização com Docker
-- Deploy em múltiplos ambientes de cloud
+O login é realizado com e-mail e senha e retorna um token JWT com validade de uma hora.
+
+As rotas protegidas utilizam o token para identificar o usuário autenticado. Usuários comuns podem consultar, atualizar e remover a própria conta, enquanto usuários com role `admin` podem executar essas operações sobre qualquer usuário.
+
+### Validação e erros
+
+As entradas da API são validadas com JSON Schema. O projeto também possui um tratamento centralizado de erros para padronizar respostas como `400`, `401`, `403`, `404` e `500`.
+
+### Paginação
+
+A listagem de usuários aceita os parâmetros `page` e `limit`.
+
+Quando não informados, são utilizados os valores padrão:
+
+```text
+page=1
+limit=10
+```
+
+O limite máximo por página é `100`.
 
 ## Como executar
 
-A aplicação pode ser executada utilizando Docker ou diretamente no ambiente local.
+A aplicação pode ser executada com Docker ou diretamente no ambiente local.
 
 ### Docker
 
@@ -139,13 +135,10 @@ A aplicação pode ser executada utilizando Docker ou diretamente no ambiente lo
 
 ```bash
 git clone https://github.com/lucassegalla/fastify-api-basics.git
+cd fastify-api-basics
 ```
 
-#### 2. Instalar o Docker
-
-Certifique-se de que o Docker e o Docker Compose estão instalados e em execução.
-
-#### 3. Configurar as variáveis de ambiente
+#### 2. Configurar as variáveis de ambiente
 
 Crie um arquivo `.env` na raiz do projeto:
 
@@ -160,31 +153,31 @@ DB_SSL=false
 JWT_SECRET=sua_chave_secreta
 ```
 
-#### 4. Iniciar os containers
-
-Execute:
+#### 3. Iniciar a aplicação
 
 ```bash
 docker compose up --build
 ```
 
-O Docker Compose irá criar e iniciar a API e o banco de dados PostgreSQL.
-
-A API estará disponível em:
+A API ficará disponível em:
 
 ```text
 http://localhost:3000
 ```
 
-#### 5. Executar migrations
+A documentação Swagger ficará disponível em:
 
-As migrations podem ser executadas dentro do ambiente Docker com:
+```text
+http://localhost:3000/docs
+```
+
+#### 4. Executar migrations
 
 ```bash
 docker compose run --rm api npm run migrate
 ```
 
-#### 6. Encerrar os containers
+#### 5. Encerrar os containers
 
 ```bash
 docker compose down
@@ -192,19 +185,15 @@ docker compose down
 
 ### Ambiente local
 
-#### 1. Clonar o repositório
+Para executar sem Docker, é necessário ter Node.js e PostgreSQL disponíveis no ambiente.
 
-```bash
-git clone https://github.com/lucassegalla/fastify-api-basics.git
-```
-
-#### 2. Instalar dependências
+#### 1. Instalar as dependências
 
 ```bash
 npm install
 ```
 
-#### 3. Configurar as variáveis de ambiente
+#### 2. Configurar as variáveis de ambiente
 
 Crie um arquivo `.env` na raiz do projeto:
 
@@ -212,20 +201,20 @@ Crie um arquivo `.env` na raiz do projeto:
 PORT=3000
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=seu_banco
-DB_USER=seu_usuario
+DB_NAME=fastify_api
+DB_USER=postgres
 DB_PASSWORD=sua_senha
 DB_SSL=false
 JWT_SECRET=sua_chave_secreta
 ```
 
-#### 4. Executar migrations
+#### 3. Executar as migrations
 
 ```bash
 npm run migrate
 ```
 
-#### 5. Iniciar a aplicação
+#### 4. Iniciar a aplicação
 
 ```bash
 npm start
@@ -233,57 +222,51 @@ npm start
 
 ## Migrations
 
-O projeto possui um mecanismo de migrations para criar e evoluir a estrutura do banco de dados independentemente do ambiente onde o PostgreSQL está sendo executado.
+As alterações na estrutura do banco ficam em `database/migrations/` e são executadas pelo script `database/migrate.js`.
 
-As migrations ficam armazenadas em:
-
-```text
-database/migrations/
-```
-
-Atualmente:
+Atualmente o projeto possui a migration:
 
 ```text
 001-create-usuarios.sql
 ```
 
-O script responsável pela execução está em:
+O próprio banco mantém uma tabela chamada `_migrations`, utilizada para registrar quais migrations já foram aplicadas. Assim, ao executar o comando novamente, apenas migrations pendentes são processadas.
 
-```text
-database/migrate.js
-```
+Cada migration é executada dentro de uma transação. Se alguma etapa falhar, o `ROLLBACK` é realizado e a migration não é registrada como concluída.
 
-Para executar as migrations:
+Para executar:
 
 ```bash
 npm run migrate
 ```
 
-Em Docker:
+Com Docker:
 
 ```bash
 docker compose run --rm api npm run migrate
 ```
 
-Esse mecanismo permite utilizar a mesma definição de estrutura do banco em diferentes ambientes, incluindo PostgreSQL local, Docker e Amazon RDS.
+O mesmo mecanismo é utilizado no ambiente AWS antes de uma nova versão da API ser implantada.
 
-## Testes Automatizados
+## Testes automatizados
 
-O projeto possui testes de integração utilizando o módulo nativo `node:test` e o método `fastify.inject()`, permitindo validar o comportamento da API sem a necessidade de iniciar um servidor HTTP.
+Os testes de integração utilizam o módulo nativo `node:test` junto com `fastify.inject()`. Isso permite testar as rotas da API sem precisar iniciar um servidor HTTP separado.
 
-Os testes utilizam um banco de dados separado do ambiente de desenvolvimento para garantir o isolamento dos dados.
+O projeto possui atualmente **24 testes de integração**, cobrindo operações CRUD, paginação, autenticação, autorização e cenários de erro.
 
-### Executando os testes com Docker
+Os testes utilizam um banco PostgreSQL separado do ambiente de desenvolvimento.
+
+### Executar com Docker
 
 ```bash
 docker compose run --rm test
 ```
 
-O Docker Compose inicia o banco de testes, aguarda até que ele esteja disponível e executa a suíte de testes em um container separado.
+O Docker Compose inicia o PostgreSQL de testes, aguarda o banco ficar disponível e executa a suíte em um container separado.
 
-### Executando os testes localmente
+### Executar localmente
 
-Para executar os testes fora do Docker, crie um arquivo `.env.test` na raiz do projeto:
+Crie um arquivo `.env.test`:
 
 ```env
 PORT=3000
@@ -296,147 +279,83 @@ DB_SSL=false
 JWT_SECRET=sua_chave_secreta_de_teste
 ```
 
-Certifique-se de que o banco de testes esteja disponível e execute:
+Depois execute:
 
 ```bash
 npm test
 ```
 
-## Integração Contínua
+## CI/CD
 
-O projeto utiliza GitHub Actions para executar automaticamente os testes de integração e validar alterações no código.
+O projeto utiliza GitHub Actions para validar alterações e automatizar o deploy na AWS.
 
-O workflow de CI é executado nos seguintes eventos:
+Em pushes e pull requests para a branch `main`, o workflow prepara um ambiente com Node.js 24 e PostgreSQL 18, instala as dependências e executa os testes de integração.
 
-- Push para a branch `main`
-- Pull request direcionado para a branch `main`
+Em pushes para `main`, depois que os testes passam, o mesmo workflow continua com o deploy na AWS. A autenticação é feita por OIDC, permitindo que o GitHub Actions assuma uma IAM Role e receba credenciais temporárias do AWS STS sem armazenar Access Keys permanentes no repositório.
 
-Durante a execução, o GitHub Actions:
+O deploy realiza o build da imagem Docker, publica a imagem no Amazon ECR, executa as migrations e atualiza o serviço da aplicação no ECS. O workflow também aguarda a estabilização do serviço antes de encerrar.
 
-1. Prepara um ambiente Ubuntu
-2. Configura o Node.js
-3. Instala as dependências do projeto
-4. Inicializa um banco PostgreSQL exclusivo para testes
-5. Cria a estrutura necessária do banco de dados
-6. Executa a suíte de testes automatizados
-
-Caso algum teste falhe, o workflow é marcado como falho, permitindo identificar problemas antes que novas alterações sejam integradas ao projeto.
+Se os testes ou a task de migration falharem, o deploy da nova versão não continua.
 
 ## Deploy
 
-O projeto possui ambientes de deploy utilizando Render e Amazon Web Services (AWS).
+O projeto possui ambientes publicados no Render e na AWS.
 
 ### Render
 
-A aplicação está publicada no Render utilizando Docker, com um banco de dados PostgreSQL gerenciado na mesma plataforma.
+A aplicação está publicada no Render utilizando Docker e um banco PostgreSQL gerenciado pela plataforma.
 
-A API está disponível publicamente em:
+API:
 
 https://fastify-api-basics.onrender.com
 
-A infraestrutura é composta por:
+Documentação:
 
-- Web Service responsável pela execução da API
-- Imagem Docker construída a partir do `Dockerfile`
-- Banco PostgreSQL gerenciado pelo Render
-- Variáveis de ambiente configuradas diretamente na plataforma
+https://fastify-api-basics.onrender.com/docs
 
-### Deploy contínuo no Render
+O deploy no Render é integrado ao repositório e ocorre após os checks configurados para o projeto serem concluídos com sucesso.
 
-O deploy da aplicação é realizado automaticamente pelo Render após a conclusão bem-sucedida dos checks de CI executados pelo GitHub Actions.
+### AWS
 
-O fluxo segue:
+O segundo ambiente utiliza serviços da AWS para separar melhor as responsabilidades da infraestrutura.
 
-```text
-Push para main
-      |
-      ▼
-GitHub Actions
-      |
-      ▼
-Testes automatizados
-      |
-      ▼
-Render
-      |
-      ▼
-Deploy
-```
+A imagem Docker é armazenada no **Amazon ECR** e executada pelo **Amazon ECS** utilizando **AWS Fargate**. O banco PostgreSQL fica no **Amazon RDS** e não precisa ser exposto publicamente para a aplicação acessá-lo.
 
-Caso os testes falhem, o deploy não é iniciado.
-
-## Deploy na AWS
-
-A aplicação também possui um ambiente implantado na AWS utilizando serviços gerenciados e containers.
-
-### Amazon ECR
-
-O Amazon Elastic Container Registry armazena a imagem Docker utilizada para executar a aplicação no ECS.
-
-### Amazon ECS e AWS Fargate
-
-A API é executada como um container através do Amazon ECS utilizando AWS Fargate, eliminando a necessidade de administrar diretamente servidores ou instâncias EC2.
-
-O ECS Service mantém a quantidade desejada de tasks da aplicação em execução.
-
-### Amazon RDS
-
-O banco de dados do ambiente AWS utiliza PostgreSQL através do Amazon RDS.
-
-A comunicação entre a aplicação e o banco ocorre utilizando SSL/TLS:
+A conexão com o RDS utiliza SSL/TLS através da variável:
 
 ```env
 DB_SSL=true
 ```
 
-O acesso ao banco é controlado através de Security Groups.
+Credenciais como `DB_PASSWORD` e `JWT_SECRET` ficam no **AWS Systems Manager Parameter Store** e são fornecidas às tasks durante sua inicialização. Os logs dos containers são enviados para o **Amazon CloudWatch**.
 
-### Parameter Store
+As migrations também fazem parte do deploy. Antes de atualizar a API, uma task temporária do ECS executa `npm run migrate`. O GitHub Actions aguarda o término dessa task e verifica seu código de saída. O deployment só continua quando a migration termina com sucesso.
 
-Informações sensíveis não são armazenadas diretamente na imagem Docker ou na Task Definition.
+### Application Load Balancer
 
-Os seguintes valores são armazenados como `SecureString` no AWS Systems Manager Parameter Store:
+O acesso público à API na AWS é feito através de um Application Load Balancer (ALB).
 
-```text
-DB_PASSWORD
-JWT_SECRET
-```
+O ALB recebe as requisições HTTP e encaminha o tráfego para um Target Group associado ao serviço da aplicação no ECS. As tasks são registradas automaticamente nesse grupo pelo ECS, evitando que o acesso à aplicação dependa diretamente do endereço IP de uma task específica.
 
-O ECS obtém esses valores durante a inicialização da task através da Task Execution Role.
+O Target Group também realiza verificações de integridade na rota `/` e encaminha tráfego apenas para tasks consideradas saudáveis.
 
-### CloudWatch
-
-Os logs dos containers executados pelo ECS são enviados para o Amazon CloudWatch, permitindo acompanhar requisições, inicialização da aplicação e erros ocorridos no ambiente AWS.
-
-### Migrations na AWS
-
-A estrutura do banco no RDS pode ser inicializada utilizando o mesmo sistema de migrations utilizado localmente.
-
-Uma task temporária do ECS executa:
-
-```bash
-npm run migrate
-```
-
-Essa task conecta-se ao RDS, executa as migrations pendentes e encerra sua execução.
-
-Atualmente esse processo é executado manualmente durante alterações na estrutura do banco.
+A porta `3000` das tasks não fica exposta diretamente à internet. O Security Group do ECS permite nessa porta apenas o tráfego proveniente do Security Group do Load Balancer.
 
 ## Documentação da API
 
-Após iniciar a aplicação localmente, a documentação interativa estará disponível em:
+A documentação é gerada automaticamente com OpenAPI a partir dos schemas definidos na aplicação e disponibilizada através do Swagger UI.
+
+Localmente:
 
 ```text
 http://localhost:3000/docs
 ```
 
-A documentação da versão publicada no Render está disponível em:
+No Render:
 
 ```text
 https://fastify-api-basics.onrender.com/docs
 ```
-
-A documentação é gerada automaticamente a partir dos JSON Schemas definidos na aplicação utilizando OpenAPI (Swagger).
 
 ## Endpoints
 
@@ -454,28 +373,24 @@ A documentação é gerada automaticamente a partir dos JSON Schemas definidos n
 
 ### Concluído
 
-- [x] Estrutura inicial da API
-- [x] CRUD de usuários
-- [x] Integração com PostgreSQL
-- [x] Arquitetura em camadas
-- [x] Repository Pattern
-- [x] Tratamento centralizado de erros
-- [x] Validação com JSON Schema
-- [x] Paginação
-- [x] Testes automatizados
-- [x] Documentação da API (Swagger/OpenAPI)
-- [x] Autenticação e autorização (JWT)
-- [x] Docker
-- [x] Docker Compose
+- [x] CRUD de usuários com PostgreSQL
+- [x] Arquitetura em camadas e Repository Pattern
+- [x] Validação, paginação e tratamento centralizado de erros
+- [x] Autenticação e autorização com JWT
+- [x] Hash de senhas com bcrypt
+- [x] Documentação com Swagger/OpenAPI
+- [x] Testes automatizados de integração
+- [x] Docker e Docker Compose
+- [x] Sistema de migrations com histórico de execução
 - [x] CI com GitHub Actions
-- [x] Deploy em cloud com Render
-- [x] CD com Render
-- [x] Deploy em cloud com AWS
+- [x] Deploy contínuo no Render
+- [x] Deploy na AWS com ECR, ECS, Fargate e RDS
+- [x] Deploy automatizado na AWS
+- [x] Application Load Balancer na AWS
 
 ### Próximos passos
 
-- [ ] Automatizar o deploy na AWS
-- [ ] Automatizar migrations durante o processo de deploy
+- [ ] HTTPS e domínio personalizado
 - [ ] Frontend para demonstração
 
 ## Autor
