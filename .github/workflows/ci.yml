@@ -1,103 +1,73 @@
-name: CI
+deploy-aws:
+  needs: test
+  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  runs-on: ubuntu-latest
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
 
-permissions:
-  id-token: write
-  contents: read
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v6
+      with:
+        role-to-assume: arn:aws:iam::952846578181:role/GitHubActionsFastifyApiDeployRole
+        aws-region: us-east-1
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
 
-    services:
-      postgres:
-        image: postgres:18
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: 123456
-          POSTGRES_DB: fastify_api_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres -d fastify_api_test"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=5
+    - name: Build Docker image
+      run: docker build -t fastify-api-basics .
 
-    env:
-      NODE_ENV: test
-      DB_HOST: localhost
-      DB_PORT: 5432
-      DB_NAME: fastify_api_test
-      DB_USER: postgres
-      DB_PASSWORD: 123456
-      JWT_SECRET: chave_secreta_teste
-      DB_SSL: false
+    - name: Tag Docker image
+      run: docker tag fastify-api-basics:latest 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api-basics:latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+    - name: Push Docker image to ECR
+      run: docker push 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api-basics:latest
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
+    - name: Run database migrations
+      id: run-migrations
+      run: |
+        TASK_ARN=$(aws ecs run-task \
+          --cluster fastify-api-cluster \
+          --launch-type FARGATE \
+          --task-definition fastify-api-db-init \
+          --network-configuration "awsvpcConfiguration={subnets=[subnet-0b15b613d8e1f9f35],securityGroups=[sg-002117cf124860385],assignPublicIp=ENABLED}" \
+          --query 'tasks[0].taskArn' \
+          --output text)
 
-      - name: Install dependencies
-        run: npm ci
+        echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
 
-      - name: Initialize test database
-        run: psql -h localhost -U $DB_USER -d $DB_NAME -f database/init/01-create-usuarios.sql
-        env:
-          PGPASSWORD: ${{ env.DB_PASSWORD }}
+    - name: Wait for migrations
+      run: |
+        aws ecs wait tasks-stopped \
+          --cluster fastify-api-cluster \
+          --tasks "${{ steps.run-migrations.outputs.task_arn }}"
 
-      - name: Run tests
-        run: npm test
-
-  deploy-aws:
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: arn:aws:iam::952846578181:role/GitHubActionsFastifyApiDeployRole
-          aws-region: us-east-1
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build Docker image
-        run: docker build -t fastify-api-basics .
-
-      - name: Tag Docker image
-        run: docker tag fastify-api-basics:latest 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api-basics:latest
-
-      - name: Push Docker image to ECR
-        run: docker push 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api-basics:latest
-
-      - name: Force new ECS deployment
+          - name: Check migration result
         run: |
-          aws ecs update-service \
+          EXIT_CODE=$(aws ecs describe-tasks \
             --cluster fastify-api-cluster \
-            --service fastify-api-service \
-            --force-new-deployment
+            --tasks "${{ steps.run-migrations.outputs.task_arn }}" \
+            --query 'tasks[0].containers[0].exitCode' \
+            --output text)
 
-      - name: Wait for ECS service stability
-        run: |
-          aws ecs wait services-stable \
-            --cluster fastify-api-cluster \
-            --services fastify-api-service
+          echo "Migration exit code: $EXIT_CODE"
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "Database migration failed."
+            exit 1
+          fi
+
+    - name: Force new ECS deployment
+      run: |
+        aws ecs update-service \
+          --cluster fastify-api-cluster \
+          --service fastify-api-service \
+          --force-new-deployment
+
+    - name: Wait for ECS service stability
+      run: |
+        aws ecs wait services-stable \
+          --cluster fastify-api-cluster \
+          --services fastify-api-service
