@@ -9,9 +9,9 @@ Projeto criado com o objetivo de estudar os fundamentos do Node.js, aprofundar o
 ## Tecnologias Utilizadas
 
 - **JavaScript** - Linguagem utilizada no desenvolvimento da aplicação
-- **Node.js 24** - Ambiente de execução JavaScript
+- **Node.js** - Ambiente de execução JavaScript
 - **Fastify** - Framework para construção da API REST
-- **PostgreSQL 18** - Sistema de gerenciamento de banco de dados relacional
+- **PostgreSQL** - Sistema de gerenciamento de banco de dados relacional
 - **JWT** - Autenticação baseada em tokens
 - **bcrypt** - Hash e verificação segura de senhas
 - **OpenAPI (Swagger)** - Documentação automática da API
@@ -314,8 +314,6 @@ O workflow de CI é executado nos seguintes eventos:
 - Push para a branch `main`
 - Pull request direcionado para a branch `main`
 
-O ambiente de CI utiliza Node.js 24 e PostgreSQL 18.
-
 Durante a execução, o GitHub Actions:
 
 1. Prepara um ambiente Ubuntu
@@ -374,27 +372,6 @@ Caso os testes falhem, o deploy não é iniciado.
 
 A aplicação também possui um ambiente implantado na AWS utilizando serviços gerenciados e containers.
 
-A arquitetura utilizada é:
-
-```text
-                    Amazon ECR
-                        |
-                        | imagem Docker
-                        ▼
-Internet ───────► Amazon ECS / Fargate
-                        |
-                        | SSL/TLS
-                        ▼
-                 Amazon RDS
-                 PostgreSQL 18
-
-Parameter Store ──────► ECS
- DB_PASSWORD
- JWT_SECRET
-
-ECS ─────────────────► CloudWatch Logs
-```
-
 ### Amazon ECR
 
 O Amazon Elastic Container Registry armazena a imagem Docker utilizada para executar a aplicação no ECS.
@@ -407,7 +384,7 @@ O ECS Service mantém a quantidade desejada de tasks da aplicação em execuçã
 
 ### Amazon RDS
 
-O banco de dados do ambiente AWS utiliza PostgreSQL 18 através do Amazon RDS.
+O banco de dados do ambiente AWS utiliza PostgreSQL através do Amazon RDS.
 
 A comunicação entre a aplicação e o banco ocorre utilizando SSL/TLS:
 
