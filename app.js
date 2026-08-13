@@ -1,5 +1,6 @@
 const configurarSwagger = require('./config/swagger');
 const jwt = require('@fastify/jwt');
+const cors = require('@fastify/cors');
 
 require('dotenv').config({
   path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
@@ -14,6 +15,11 @@ function construirApp(options = {}) {
         removeAdditional: false,
       },
     },
+  });
+
+  fastify.register(cors, {
+    origin: process.env.CORS_ORIGIN,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   });
 
   fastify.register(configurarSwagger);
