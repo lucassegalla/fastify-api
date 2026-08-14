@@ -42,7 +42,7 @@ O projeto começou como uma API CRUD simples para estudar Node.js e Fastify e fo
 
 ## Arquitetura
 
-A aplicação utiliza uma arquitetura em camadas para manter cada parte do código com uma responsabilidade bem definida
+A aplicação utiliza uma arquitetura em camadas para manter cada parte do código com uma responsabilidade definida
 
 ```text
 Cliente
@@ -459,8 +459,7 @@ https://api.segalla.dev/docs
 - [x] Deploy contínuo no Render
 - [x] Deploy na AWS com ECR, ECS, Fargate e RDS
 - [x] Deploy automatizado na AWS
-- [x] Application Load Balancer na AWS
-- [x] Domínio personalizado e HTTPS
+- [x] Application Load Balancer, domínio personalizado e HTTPS
 
 ### Próximos passos
 
