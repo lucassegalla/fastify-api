@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import { criarUsuario } from '../services/usuariosService';
+import { login } from '../services/autenticacaoService';
 
-function Cadastro() {
+function Cadastro({ setToken }) {
   const [nome, setNome] = useState('');
   const [idade, setIdade] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
-  const [sucesso, setSucesso] = useState('');
 
   async function cadastrar(event) {
     event.preventDefault();
 
     setErro('');
-    setSucesso('');
 
     try {
       await criarUsuario({
@@ -23,12 +22,10 @@ function Cadastro() {
         senha,
       });
 
-      setSucesso('Usuário cadastrado com sucesso.');
+      const data = await login(email, senha);
 
-      setNome('');
-      setIdade('');
-      setEmail('');
-      setSenha('');
+      localStorage.setItem('token', data.token);
+      setToken(data.token);
     } catch (error) {
       setErro(error.message);
     }
@@ -67,7 +64,6 @@ function Cadastro() {
       <button type="submit">Cadastrar</button>
 
       {erro && <p>{erro}</p>}
-      {sucesso && <p>{sucesso}</p>}
     </form>
   );
 }

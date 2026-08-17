@@ -46,4 +46,51 @@ async function buscarUsuarioPorId(token, id) {
   return data;
 }
 
-export { criarUsuario, buscarUsuarioPorId };
+async function atualizarUsuario(token, id, usuario) {
+  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(usuario),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(
+      data.mensagem || data.message || 'Erro ao atualizar usuário.',
+    );
+
+    error.status = response.status;
+
+    throw error;
+  }
+
+  return data;
+}
+
+async function listarUsuarios(token) {
+  const response = await fetch(`${API_URL}/usuarios`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(
+      data.mensagem || data.message || 'Erro ao buscar usuários.',
+    );
+
+    error.status = response.status;
+
+    throw error;
+  }
+
+  return data;
+}
+
+export { criarUsuario, buscarUsuarioPorId, atualizarUsuario, listarUsuarios };

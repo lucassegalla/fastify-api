@@ -1,19 +1,16 @@
 import { useState } from 'react';
 import { atualizarUsuario } from '../services/usuariosService';
 
-function EditarUsuario({ usuario, token, aoAtualizar, aoCancelar }) {
+function EditarPerfil({ usuario, token, aoAtualizar, aoCancelar }) {
   const [nome, setNome] = useState(usuario.nome);
   const [idade, setIdade] = useState(usuario.idade);
   const [email, setEmail] = useState(usuario.email);
-
   const [erro, setErro] = useState('');
-  const [sucesso, setSucesso] = useState('');
 
   async function salvarAlteracoes(event) {
     event.preventDefault();
 
     setErro('');
-    setSucesso('');
 
     try {
       const usuarioAtualizado = await atualizarUsuario(token, usuario.id, {
@@ -21,8 +18,6 @@ function EditarUsuario({ usuario, token, aoAtualizar, aoCancelar }) {
         idade: Number(idade),
         email,
       });
-
-      setSucesso('Usuário atualizado com sucesso.');
 
       aoAtualizar(usuarioAtualizado);
     } catch (error) {
@@ -32,7 +27,7 @@ function EditarUsuario({ usuario, token, aoAtualizar, aoCancelar }) {
 
   return (
     <form onSubmit={salvarAlteracoes}>
-      <h2>Editar usuário</h2>
+      <h2>Editar perfil</h2>
 
       <input
         type="text"
@@ -59,9 +54,8 @@ function EditarUsuario({ usuario, token, aoAtualizar, aoCancelar }) {
       </button>
 
       {erro && <p>{erro}</p>}
-      {sucesso && <p>{sucesso}</p>}
     </form>
   );
 }
 
-export default EditarUsuario;
+export default EditarPerfil;
