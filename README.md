@@ -13,6 +13,7 @@ O projeto começou como uma API CRUD simples para estudar Node.js e Fastify e fo
 - **JavaScript** - Linguagem utilizada na aplicação
 - **Node.js** - Ambiente de execução JavaScript
 - **Fastify** - Framework utilizado para construir a API
+- **@fastify/static** - Servimento dos arquivos estáticos do frontend em produção
 - **PostgreSQL** - Banco de dados relacional
 - **pg** - Comunicação entre a aplicação e o PostgreSQL
 - **JWT** - Autenticação baseada em tokens
@@ -29,13 +30,13 @@ O projeto começou como uma API CRUD simples para estudar Node.js e Fastify e fo
 
 ### Containers e CI/CD
 
-- **Docker** - Containerização da aplicação
-- **Docker Compose** - Execução da API e PostgreSQL em containers
+- **Docker** - Build e containerização da aplicação
+- **Docker Compose** - Execução local da aplicação e PostgreSQL em containers
 - **GitHub Actions** - Automação dos testes, build e deploys
 
 ### Cloud
 
-- **Render** - Ambiente de deploy da aplicação
+- **Render** - Ambiente de deploy da API
 - **Amazon ECR** - Armazenamento das imagens Docker
 - **Amazon ECS + AWS Fargate** - Execução dos containers na AWS
 - **Amazon RDS** - PostgreSQL gerenciado
@@ -100,39 +101,41 @@ Definem as validações de entrada e saída utilizando JSON Schema e também sã
 .
 ├── .github/
 │   └── workflows/
-│       └── ci.yml              # Pipeline de CI/CD
+│       └── ci.yml        # Pipeline de CI/CD
 ├── backend/
-│   ├── config/                 # Configurações da aplicação
-│   ├── controllers/            # Tratamento das requisições HTTP
+│   ├── config/           # Configurações da aplicação
+│   ├── controllers/      # Tratamento das requisições HTTP
 │   ├── database/
-│   │   ├── migrations/         # Migrations do banco de dados
-│   │   ├── connection.js       # Conexão com PostgreSQL
-│   │   └── migrate.js          # Executor das migrations
-│   ├── errors/                 # Erros personalizados
-│   ├── middlewares/            # Autenticação e autorização
-│   ├── repositories/           # Consultas ao banco de dados
-│   ├── routes/                 # Rotas da API
-│   ├── schemas/                # Validação e documentação das rotas
-│   ├── services/               # Regras de negócio
+│   │   ├── migrations/   # Migrations do banco de dados
+│   │   ├── connection.js # Conexão com PostgreSQL
+│   │   └── migrate.js    # Executor das migrations
+│   ├── errors/           # Erros personalizados
+│   ├── middlewares/      # Autenticação e autorização
+│   ├── repositories/     # Consultas ao banco de dados
+│   ├── routes/           # Rotas da API
+│   ├── schemas/          # Validação e documentação das rotas
+│   ├── services/         # Regras de negócio
 │   ├── tests/
-│   │   ├── helpers/            # Utilitários utilizados nos testes
-│   │   └── integration/        # Testes de integração
-│   ├── .dockerignore           # Arquivos ignorados durante o build da imagem
-│   ├── Dockerfile              # Imagem Docker do backend
-│   ├── app.js                  # Configuração e criação da aplicação Fastify
-│   ├── server.js               # Inicialização do servidor
-│   ├── package.json            # Dependências e scripts do backend
-│   └── package-lock.json       # Versões exatas das dependências
+│   │   ├── helpers/      # Utilitários utilizados nos testes
+│   │   └── integration/  # Testes de integração
+│   ├── Dockerfile        # Build do frontend e imagem da aplicação
+│   ├── app.js            # Configuração e criação da aplicação Fastify
+│   ├── server.js         # Inicialização do servidor
+│   ├── package.json
+│   └── package-lock.json
 ├── frontend/
+│   ├── public/
 │   ├── src/
-│   │   ├── components/         # Componentes da interface
-│   │   ├── services/           # Comunicação com a API
-│   │   └── utils/              # Funções auxiliares
-│   ├── package.json            # Dependências e scripts do frontend
-│   └── package-lock.json       # Versões exatas das dependências
-├── .gitignore                  # Arquivos ignorados pelo Git
-├── docker-compose.yml          # API e PostgreSQL em containers
-└── README.md                   # Documentação do projeto
+│   │   ├── components/   # Componentes da interface
+│   │   ├── services/     # Comunicação com a API
+│   │   └── utils/        # Funções auxiliares
+│   ├── index.html
+│   ├── package.json
+│   └── package-lock.json
+├── .dockerignore         # Arquivos ignorados durante o build Docker
+├── .gitignore            # Arquivos ignorados pelo Git
+├── docker-compose.yml    # Aplicação e PostgreSQL em containers
+└── README.md             # Documentação do projeto
 ```
 
 ## Funcionalidades
@@ -185,7 +188,7 @@ Usuários administradores também possuem uma tela para listar, editar e remover
 
 ## Como executar
 
-A API pode ser executada utilizando Docker ou diretamente no ambiente local, enquanto o frontend pode ser executado localmente utilizando Vite
+A aplicação pode ser executada utilizando Docker ou diretamente no ambiente local, durante o desenvolvimento o frontend também pode ser executado separadamente utilizando Vite
 
 ### Docker
 
@@ -223,9 +226,9 @@ Na raiz do projeto execute:
 docker compose --env-file ./backend/.env up --build
 ```
 
-O Docker Compose inicia o PostgreSQL, executa as migrations pendentes e depois inicia a API
+O Docker Compose inicia o PostgreSQL, executa as migrations pendentes e depois inicia a aplicação com frontend e backend
 
-A API ficará disponível em:
+A aplicação ficará disponível em:
 
 ```text
 http://localhost:3000
@@ -308,7 +311,7 @@ npm ci
 Crie um arquivo `.env` dentro da pasta `frontend`:
 
 ```env
-VITE_API_URL=http://localhost:3000
+VITE_API_URL=http://localhost:3000/api
 ```
 
 Inicie o frontend:
@@ -326,7 +329,7 @@ http://localhost:5173
 A API ficará disponível em:
 
 ```text
-http://localhost:3000
+http://localhost:3000/api
 ```
 
 A documentação Swagger ficará disponível em:
@@ -364,7 +367,7 @@ Para executar no banco de testes:
 npm run migrate:test
 ```
 
-Com Docker as migrations são executadas automaticamente antes da API ser iniciada
+Com Docker as migrations são executadas automaticamente antes da aplicação ser iniciada
 
 No ambiente AWS o mesmo sistema faz parte do processo de deploy, antes de uma nova versão da aplicação ser implantada uma task temporária do ECS executa as migrations pendentes
 
@@ -424,7 +427,7 @@ Caso os testes, o build do frontend ou a task responsável pelas migrations falh
 
 ## Deploy
 
-A API possui ambientes publicados no Render e na AWS
+O projeto possui ambientes publicados no Render e na AWS
 
 ### Render
 
@@ -448,7 +451,7 @@ O deploy no Render é integrado ao repositório e ocorre após os checks configu
 
 A aplicação também possui um ambiente na AWS utilizando diferentes serviços para separar as responsabilidades da infraestrutura
 
-API:
+Aplicação:
 
 ```text
 https://api.segalla.dev
@@ -458,6 +461,12 @@ Documentação:
 
 ```text
 https://api.segalla.dev/docs
+```
+
+API:
+
+```text
+https://api.segalla.dev/api
 ```
 
 A imagem Docker é armazenada no Amazon ECR e executada pelo Amazon ECS utilizando AWS Fargate, enquanto o banco PostgreSQL é executado pelo Amazon RDS
@@ -476,7 +485,7 @@ As migrations também fazem parte do deploy, antes da atualização da aplicaç�
 
 ### Application Load Balancer
 
-O acesso público à API na AWS é feito através de um Application Load Balancer que funciona como ponto de entrada para as requisições
+O acesso público à aplicação na AWS é feito através de um Application Load Balancer que funciona como ponto de entrada para as requisições
 
 O domínio `api.segalla.dev` é gerenciado pela Cloudflare e através do DNS aponta para o Load Balancer da AWS
 
@@ -486,7 +495,7 @@ Requisições feitas através de HTTP na porta `80` são redirecionadas automati
 
 O ALB encaminha as requisições para o Target Group `fastify-api-tg` que mantém as tasks do ECS disponíveis para receber o tráfego
 
-O Target Group também realiza verificações de integridade na rota `/` e encaminha requisições apenas para tasks consideradas saudáveis
+O Target Group também realiza verificações de integridade na rota `/health` e encaminha requisições apenas para tasks consideradas saudáveis
 
 A porta `3000` das tasks não fica exposta diretamente à internet e o Security Group do ECS permite nessa porta apenas o tráfego proveniente do Security Group do Load Balancer
 
@@ -514,15 +523,15 @@ https://api.segalla.dev/docs
 
 ## Endpoints
 
-| Método   | Endpoint        | Autenticação | Status | Descrição                                   |
-| :------- | :-------------- | :----------: | :----: | :------------------------------------------ |
-| `GET`    | `/`             |     Não      | `200`  | Verifica se a API está em execução          |
-| `POST`   | `/login`        |     Não      | `200`  | Autentica um usuário e retorna um token JWT |
-| `POST`   | `/usuarios`     |     Não      | `201`  | Cria um novo usuário                        |
-| `GET`    | `/usuarios`     | JWT + Admin  | `200`  | Lista os usuários cadastrados               |
-| `GET`    | `/usuarios/:id` |     JWT      | `200`  | Busca os dados de um usuário                |
-| `PUT`    | `/usuarios/:id` |     JWT      | `200`  | Atualiza os dados de um usuário             |
-| `DELETE` | `/usuarios/:id` |     JWT      | `204`  | Remove um usuário                           |
+| Método   | Endpoint            | Autenticação | Status | Descrição                                   |
+| :------- | :------------------ | :----------: | :----: | :------------------------------------------ |
+| `GET`    | `/health`           |     Não      | `200`  | Verifica se a aplicação está em execução    |
+| `POST`   | `/api/login`        |     Não      | `200`  | Autentica um usuário e retorna um token JWT |
+| `POST`   | `/api/usuarios`     |     Não      | `201`  | Cria um novo usuário                        |
+| `GET`    | `/api/usuarios`     | JWT + Admin  | `200`  | Lista os usuários cadastrados               |
+| `GET`    | `/api/usuarios/:id` |     JWT      | `200`  | Busca os dados de um usuário                |
+| `PUT`    | `/api/usuarios/:id` |     JWT      | `200`  | Atualiza os dados de um usuário             |
+| `DELETE` | `/api/usuarios/:id` |     JWT      | `204`  | Remove um usuário                           |
 
 ## Roadmap
 

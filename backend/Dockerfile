@@ -16,32 +16,6 @@ ENV VITE_API_URL=/api
 RUN npm run build
 
 
-FROM node:24-slim AS backend-base
-
-WORKDIR /app
-
-COPY backend/package*.json ./
-
-RUN npm ci
-
-
-FROM backend-base AS test
-
-COPY backend/app.js backend/server.js ./
-COPY backend/config ./config
-COPY backend/controllers ./controllers
-COPY backend/database ./database
-COPY backend/errors ./errors
-COPY backend/middlewares ./middlewares
-COPY backend/repositories ./repositories
-COPY backend/routes ./routes
-COPY backend/schemas ./schemas
-COPY backend/services ./services
-COPY backend/tests ./tests
-
-CMD ["npm", "test"]
-
-
 FROM node:24-slim AS production
 
 WORKDIR /app

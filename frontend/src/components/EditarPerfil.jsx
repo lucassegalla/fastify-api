@@ -59,6 +59,9 @@ function EditarPerfil({ usuario, token, aoAtualizar, aoCancelar }) {
               type="number"
               value={idade}
               onChange={(event) => setIdade(event.target.value)}
+              min="0"
+              max="150"
+              required
               disabled={carregando}
             />
           </div>

@@ -99,7 +99,6 @@ async function removerUsuario(id, usuarioAutenticado) {
 module.exports = {
   listarUsuarios,
   criarUsuario,
-  buscarUsuarioPorId,
   buscarUsuarioAutorizado,
   atualizarUsuario,
   removerUsuario,

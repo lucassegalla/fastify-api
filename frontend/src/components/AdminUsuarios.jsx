@@ -122,6 +122,7 @@ function AdminUsuarios({ token, idUsuarioAtual }) {
                 type="button"
                 className="button-secondary"
                 onClick={() => setUsuarioEmEdicao(usuario)}
+                disabled={usuario.id === idUsuarioAtual}
               >
                 Editar
               </button>

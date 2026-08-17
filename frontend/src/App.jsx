@@ -29,6 +29,7 @@ function App() {
     setEditandoPerfil(false);
     setCarregandoPerfil(false);
     setErroPerfil('');
+    setTelaPublica('login');
   }
 
   useEffect(() => {

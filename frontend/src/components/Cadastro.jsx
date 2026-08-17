@@ -78,6 +78,9 @@ function Cadastro({ setToken, irParaLogin }) {
               placeholder="Sua idade"
               value={idade}
               onChange={(event) => setIdade(event.target.value)}
+              min="0"
+              max="150"
+              required
               disabled={carregando}
             />
           </div>

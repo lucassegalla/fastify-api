@@ -33,11 +33,13 @@ const usuarioCriacaoBodySchema = {
     nome: {
       type: 'string',
       minLength: 3,
+      maxLength: 255,
       description: 'Nome do usuário',
     },
     email: {
       type: 'string',
       format: 'email',
+      maxLength: 255,
       description: 'E-mail do usuário',
     },
     senha: {
@@ -48,6 +50,7 @@ const usuarioCriacaoBodySchema = {
     idade: {
       type: 'integer',
       minimum: 0,
+      maximum: 150,
       description: 'Idade do usuário',
     },
   },
@@ -61,16 +64,19 @@ const usuarioAtualizacaoBodySchema = {
     nome: {
       type: 'string',
       minLength: 3,
+      maxLength: 255,
       description: 'Nome do usuário',
     },
     email: {
       type: 'string',
       format: 'email',
+      maxLength: 255,
       description: 'E-mail do usuário',
     },
     idade: {
       type: 'integer',
       minimum: 0,
+      maximum: 150,
       description: 'Idade do usuário',
     },
   },
