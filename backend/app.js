@@ -56,10 +56,18 @@ function construirApp(options = {}) {
   });
 
   const usuariosRoutes = require('./routes/usuarios');
-  fastify.register(usuariosRoutes);
+  fastify.register(usuariosRoutes, {
+    prefix: '/api',
+  });
 
   const autenticacaoRoutes = require('./routes/autenticacao');
-  fastify.register(autenticacaoRoutes);
+  fastify.register(autenticacaoRoutes, {
+    prefix: '/api',
+  });
+
+  fastify.get('/health', async () => {
+    return { mensagem: 'API funcionando' };
+  });
 
   fastify.get('/', async () => {
     return { mensagem: 'API funcionando' };

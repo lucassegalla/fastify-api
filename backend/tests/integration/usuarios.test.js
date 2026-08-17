@@ -11,27 +11,23 @@ beforeEach(async () => {
   await usuariosRepository.limparUsuarios();
 });
 
-test('GET / deve retornar API funcionando', async () => {
-  const app = construirApp({
-    logger: false,
-  });
+test('GET /health deve retornar API funcionando', async () => {
+  const app = construirApp({ logger: false });
 
   const resposta = await app.inject({
     method: 'GET',
-    url: '/',
+    url: '/health',
   });
 
-  const body = JSON.parse(resposta.body);
-
   assert.equal(resposta.statusCode, 200);
-  assert.deepEqual(body, {
+  assert.deepEqual(JSON.parse(resposta.body), {
     mensagem: 'API funcionando',
   });
 
   await app.close();
 });
 
-test('GET /usuarios deve permitir admin listar usuários', async () => {
+test('GET /api/usuarios deve permitir admin listar usuários', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -49,7 +45,7 @@ test('GET /usuarios deve permitir admin listar usuários', async () => {
 
   const resposta = await app.inject({
     method: 'GET',
-    url: '/usuarios',
+    url: '/api/usuarios',
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -68,7 +64,7 @@ test('GET /usuarios deve permitir admin listar usuários', async () => {
   await app.close();
 });
 
-test('GET /usuarios não deve permitir usuário comum listar usuários', async () => {
+test('GET /api/usuarios não deve permitir usuário comum listar usuários', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -84,7 +80,7 @@ test('GET /usuarios não deve permitir usuário comum listar usuários', async (
 
   const resposta = await app.inject({
     method: 'GET',
-    url: '/usuarios',
+    url: '/api/usuarios',
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -99,7 +95,7 @@ test('GET /usuarios não deve permitir usuário comum listar usuários', async (
   await app.close();
 });
 
-test('GET /usuarios deve aplicar paginação informada para admin', async () => {
+test('GET /api/usuarios deve aplicar paginação informada para admin', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -126,7 +122,7 @@ test('GET /usuarios deve aplicar paginação informada para admin', async () => 
 
   const resposta = await app.inject({
     method: 'GET',
-    url: '/usuarios?page=2&limit=5',
+    url: '/api/usuarios?page=2&limit=5',
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -146,14 +142,14 @@ test('GET /usuarios deve aplicar paginação informada para admin', async () => 
   await app.close();
 });
 
-test('GET /usuarios deve rejeitar página inválida', async () => {
+test('GET /api/usuarios deve rejeitar página inválida', async () => {
   const app = construirApp({
     logger: false,
   });
 
   const resposta = await app.inject({
     method: 'GET',
-    url: '/usuarios?page=0',
+    url: '/api/usuarios?page=0',
   });
 
   const body = JSON.parse(resposta.body);
@@ -164,14 +160,14 @@ test('GET /usuarios deve rejeitar página inválida', async () => {
   await app.close();
 });
 
-test('POST /usuarios deve criar um usuário', async () => {
+test('POST /api/usuarios deve criar um usuário', async () => {
   const app = construirApp({
     logger: false,
   });
 
   const resposta = await app.inject({
     method: 'POST',
-    url: '/usuarios',
+    url: '/api/usuarios',
     payload: {
       nome: 'Nome Exemplo',
       email: 'usuario@exemplo.com',
@@ -192,14 +188,14 @@ test('POST /usuarios deve criar um usuário', async () => {
   await app.close();
 });
 
-test('POST /usuarios deve criar usuário com nome normalizado', async () => {
+test('POST /api/usuarios deve criar usuário com nome normalizado', async () => {
   const app = construirApp({
     logger: false,
   });
 
   const resposta = await app.inject({
     method: 'POST',
-    url: '/usuarios',
+    url: '/api/usuarios',
     payload: {
       nome: '    Nome Exemplo     ',
       email: 'usuario@exemplo.com',
@@ -219,14 +215,14 @@ test('POST /usuarios deve criar usuário com nome normalizado', async () => {
   await app.close();
 });
 
-test('POST /usuarios deve rejeitar nome inválido após normalização', async () => {
+test('POST /api/usuarios deve rejeitar nome inválido após normalização', async () => {
   const app = construirApp({
     logger: false,
   });
 
   const resposta = await app.inject({
     method: 'POST',
-    url: '/usuarios',
+    url: '/api/usuarios',
     payload: {
       nome: '   ',
       email: 'usuario@exemplo.com',
@@ -247,7 +243,7 @@ test('POST /usuarios deve rejeitar nome inválido após normalização', async (
   await app.close();
 });
 
-test('GET /usuarios/:id deve retornar um usuário', async () => {
+test('GET /api/usuarios/:id deve retornar um usuário', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -263,7 +259,7 @@ test('GET /usuarios/:id deve retornar um usuário', async () => {
 
   const resposta = await app.inject({
     method: 'GET',
-    url: `/usuarios/${usuario.id}`,
+    url: `/api/usuarios/${usuario.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -281,7 +277,7 @@ test('GET /usuarios/:id deve retornar um usuário', async () => {
   await app.close();
 });
 
-test('GET /usuarios/:id deve retornar 403 ao acessar id não autorizado', async () => {
+test('GET /api/usuarios/:id deve retornar 403 ao acessar id não autorizado', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -297,7 +293,7 @@ test('GET /usuarios/:id deve retornar 403 ao acessar id não autorizado', async 
 
   const resposta = await app.inject({
     method: 'GET',
-    url: '/usuarios/999',
+    url: '/api/usuarios/999',
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -312,7 +308,7 @@ test('GET /usuarios/:id deve retornar 403 ao acessar id não autorizado', async 
   await app.close();
 });
 
-test('GET /usuarios/:id admin deve receber 404 para usuário inexistente', async () => {
+test('GET /api/usuarios/:id admin deve receber 404 para usuário inexistente', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -330,7 +326,7 @@ test('GET /usuarios/:id admin deve receber 404 para usuário inexistente', async
 
   const resposta = await app.inject({
     method: 'GET',
-    url: '/usuarios/999',
+    url: '/api/usuarios/999',
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -345,7 +341,7 @@ test('GET /usuarios/:id admin deve receber 404 para usuário inexistente', async
   await app.close();
 });
 
-test('PUT /usuarios/:id deve atualizar um usuário', async () => {
+test('PUT /api/usuarios/:id deve atualizar um usuário', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -361,7 +357,7 @@ test('PUT /usuarios/:id deve atualizar um usuário', async () => {
 
   const resposta = await app.inject({
     method: 'PUT',
-    url: `/usuarios/${usuario.id}`,
+    url: `/api/usuarios/${usuario.id}`,
     payload: {
       nome: 'Nome Atualizado',
       email: 'usuario.atualizado@exemplo.com',
@@ -384,7 +380,7 @@ test('PUT /usuarios/:id deve atualizar um usuário', async () => {
   await app.close();
 });
 
-test('PUT /usuarios/:id deve retornar 403 ao acessar id não autorizado', async () => {
+test('PUT /api/usuarios/:id deve retornar 403 ao acessar id não autorizado', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -400,7 +396,7 @@ test('PUT /usuarios/:id deve retornar 403 ao acessar id não autorizado', async 
 
   const resposta = await app.inject({
     method: 'PUT',
-    url: '/usuarios/999',
+    url: '/api/usuarios/999',
     payload: {
       nome: 'Nome Atualizado',
       email: 'usuario.atualizado@exemplo.com',
@@ -420,7 +416,7 @@ test('PUT /usuarios/:id deve retornar 403 ao acessar id não autorizado', async 
   await app.close();
 });
 
-test('PUT /usuarios/:id admin deve receber 404 para usuário inexistente', async () => {
+test('PUT /api/usuarios/:id admin deve receber 404 para usuário inexistente', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -438,7 +434,7 @@ test('PUT /usuarios/:id admin deve receber 404 para usuário inexistente', async
 
   const resposta = await app.inject({
     method: 'PUT',
-    url: '/usuarios/999',
+    url: '/api/usuarios/999',
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -458,7 +454,7 @@ test('PUT /usuarios/:id admin deve receber 404 para usuário inexistente', async
   await app.close();
 });
 
-test('DELETE /usuarios/:id deve remover um usuário', async () => {
+test('DELETE /api/usuarios/:id deve remover um usuário', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -474,7 +470,7 @@ test('DELETE /usuarios/:id deve remover um usuário', async () => {
 
   const resposta = await app.inject({
     method: 'DELETE',
-    url: `/usuarios/${usuario.id}`,
+    url: `/api/usuarios/${usuario.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -491,7 +487,7 @@ test('DELETE /usuarios/:id deve remover um usuário', async () => {
   await app.close();
 });
 
-test('DELETE /usuarios/:id deve retornar 403 ao acessar id não autorizado', async () => {
+test('DELETE /api/usuarios/:id deve retornar 403 ao acessar id não autorizado', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -507,7 +503,7 @@ test('DELETE /usuarios/:id deve retornar 403 ao acessar id não autorizado', asy
 
   const resposta = await app.inject({
     method: 'DELETE',
-    url: '/usuarios/999',
+    url: '/api/usuarios/999',
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -522,7 +518,7 @@ test('DELETE /usuarios/:id deve retornar 403 ao acessar id não autorizado', asy
   await app.close();
 });
 
-test('DELETE /usuarios/:id admin deve receber 404 para usuário inexistente', async () => {
+test('DELETE /api/usuarios/:id admin deve receber 404 para usuário inexistente', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -540,7 +536,7 @@ test('DELETE /usuarios/:id admin deve receber 404 para usuário inexistente', as
 
   const resposta = await app.inject({
     method: 'DELETE',
-    url: '/usuarios/999',
+    url: '/api/usuarios/999',
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -555,14 +551,14 @@ test('DELETE /usuarios/:id admin deve receber 404 para usuário inexistente', as
   await app.close();
 });
 
-test('POST /login deve autenticar usuário com credenciais válidas', async () => {
+test('POST /api/login deve autenticar usuário com credenciais válidas', async () => {
   const app = construirApp({
     logger: false,
   });
 
   await app.inject({
     method: 'POST',
-    url: '/usuarios',
+    url: '/api/usuarios',
     payload: {
       nome: 'Nome Exemplo',
       email: 'usuario@exemplo.com',
@@ -573,7 +569,7 @@ test('POST /login deve autenticar usuário com credenciais válidas', async () =
 
   const resposta = await app.inject({
     method: 'POST',
-    url: '/login',
+    url: '/api/login',
     payload: {
       email: 'usuario@exemplo.com',
       senha: senhaTeste,
@@ -589,14 +585,14 @@ test('POST /login deve autenticar usuário com credenciais válidas', async () =
   await app.close();
 });
 
-test('POST /login deve retornar 401 para senha incorreta', async () => {
+test('POST /api/login deve retornar 401 para senha incorreta', async () => {
   const app = construirApp({
     logger: false,
   });
 
   await app.inject({
     method: 'POST',
-    url: '/usuarios',
+    url: '/api/usuarios',
     payload: {
       nome: 'Nome Exemplo',
       email: 'usuario@exemplo.com',
@@ -607,7 +603,7 @@ test('POST /login deve retornar 401 para senha incorreta', async () => {
 
   const resposta = await app.inject({
     method: 'POST',
-    url: '/login',
+    url: '/api/login',
     payload: {
       email: 'usuario@exemplo.com',
       senha: 'senha-incorreta',
@@ -623,14 +619,14 @@ test('POST /login deve retornar 401 para senha incorreta', async () => {
   await app.close();
 });
 
-test('POST /login deve retornar 401 para email inexistente', async () => {
+test('POST /api/login deve retornar 401 para email inexistente', async () => {
   const app = construirApp({
     logger: false,
   });
 
   const resposta = await app.inject({
     method: 'POST',
-    url: '/login',
+    url: '/api/login',
     payload: {
       email: 'inexistente@exemplo.com',
       senha: senhaTeste,
@@ -646,7 +642,7 @@ test('POST /login deve retornar 401 para email inexistente', async () => {
   await app.close();
 });
 
-test('PUT /usuarios/:id deve permitir usuário atualizar a própria conta', async () => {
+test('PUT /api/usuarios/:id deve permitir usuário atualizar a própria conta', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -662,7 +658,7 @@ test('PUT /usuarios/:id deve permitir usuário atualizar a própria conta', asyn
 
   const resposta = await app.inject({
     method: 'PUT',
-    url: `/usuarios/${usuarioCriado.id}`,
+    url: `/api/usuarios/${usuarioCriado.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -684,7 +680,7 @@ test('PUT /usuarios/:id deve permitir usuário atualizar a própria conta', asyn
   await app.close();
 });
 
-test('PUT /usuarios/:id não deve permitir usuario atualizar conta de outro usuario', async () => {
+test('PUT /api/usuarios/:id não deve permitir usuario atualizar conta de outro usuario', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -707,7 +703,7 @@ test('PUT /usuarios/:id não deve permitir usuario atualizar conta de outro usua
 
   const resposta = await app.inject({
     method: 'PUT',
-    url: `/usuarios/${usuario2.id}`,
+    url: `/api/usuarios/${usuario2.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -727,7 +723,7 @@ test('PUT /usuarios/:id não deve permitir usuario atualizar conta de outro usua
   await app.close();
 });
 
-test('DELETE /usuarios/:id não deve permitir usuario deletar conta de outro usuario', async () => {
+test('DELETE /api/usuarios/:id não deve permitir usuario deletar conta de outro usuario', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -750,7 +746,7 @@ test('DELETE /usuarios/:id não deve permitir usuario deletar conta de outro usu
 
   const resposta = await app.inject({
     method: 'DELETE',
-    url: `/usuarios/${usuario2.id}`,
+    url: `/api/usuarios/${usuario2.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -765,7 +761,7 @@ test('DELETE /usuarios/:id não deve permitir usuario deletar conta de outro usu
   await app.close();
 });
 
-test('PUT /usuarios/:id admin pode alterar qualquer usuário', async () => {
+test('PUT /api/usuarios/:id admin pode alterar qualquer usuário', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -790,7 +786,7 @@ test('PUT /usuarios/:id admin pode alterar qualquer usuário', async () => {
 
   const resposta = await app.inject({
     method: 'PUT',
-    url: `/usuarios/${usuario.id}`,
+    url: `/api/usuarios/${usuario.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -812,7 +808,7 @@ test('PUT /usuarios/:id admin pode alterar qualquer usuário', async () => {
   await app.close();
 });
 
-test('DELETE /usuarios/:id admin pode deletar qualquer usuário', async () => {
+test('DELETE /api/usuarios/:id admin pode deletar qualquer usuário', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -837,7 +833,7 @@ test('DELETE /usuarios/:id admin pode deletar qualquer usuário', async () => {
 
   const resposta = await app.inject({
     method: 'DELETE',
-    url: `/usuarios/${usuario.id}`,
+    url: `/api/usuarios/${usuario.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -853,7 +849,7 @@ test('DELETE /usuarios/:id admin pode deletar qualquer usuário', async () => {
   await app.close();
 });
 
-test('GET /usuarios/:id deve permitir usuário buscar a própria conta', async () => {
+test('GET /api/usuarios/:id deve permitir usuário buscar a própria conta', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -869,7 +865,7 @@ test('GET /usuarios/:id deve permitir usuário buscar a própria conta', async (
 
   const resposta = await app.inject({
     method: 'GET',
-    url: `/usuarios/${usuario.id}`,
+    url: `/api/usuarios/${usuario.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -884,7 +880,7 @@ test('GET /usuarios/:id deve permitir usuário buscar a própria conta', async (
   await app.close();
 });
 
-test('GET /usuarios/:id não deve permitir usuário buscar conta de outro usuário', async () => {
+test('GET /api/usuarios/:id não deve permitir usuário buscar conta de outro usuário', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -907,7 +903,7 @@ test('GET /usuarios/:id não deve permitir usuário buscar conta de outro usuár
 
   const resposta = await app.inject({
     method: 'GET',
-    url: `/usuarios/${usuario2.id}`,
+    url: `/api/usuarios/${usuario2.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -922,7 +918,7 @@ test('GET /usuarios/:id não deve permitir usuário buscar conta de outro usuár
   await app.close();
 });
 
-test('GET /usuarios/:id admin pode buscar qualquer usuário', async () => {
+test('GET /api/usuarios/:id admin pode buscar qualquer usuário', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -947,7 +943,7 @@ test('GET /usuarios/:id admin pode buscar qualquer usuário', async () => {
 
   const resposta = await app.inject({
     method: 'GET',
-    url: `/usuarios/${usuario.id}`,
+    url: `/api/usuarios/${usuario.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -963,7 +959,7 @@ test('GET /usuarios/:id admin pode buscar qualquer usuário', async () => {
   await app.close();
 });
 
-test('POST /usuarios deve retornar 409 para e-mail já cadastrado', async () => {
+test('POST /api/usuarios deve retornar 409 para e-mail já cadastrado', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -977,7 +973,7 @@ test('POST /usuarios deve retornar 409 para e-mail já cadastrado', async () => 
 
   const resposta = await app.inject({
     method: 'POST',
-    url: '/usuarios',
+    url: '/api/usuarios',
     payload: {
       nome: 'Usuário 2',
       email: 'usuario@exemplo.com',
@@ -995,7 +991,7 @@ test('POST /usuarios deve retornar 409 para e-mail já cadastrado', async () => 
   await app.close();
 });
 
-test('PUT /usuarios/:id deve retornar 409 ao usar e-mail de outro usuário', async () => {
+test('PUT /api/usuarios/:id deve retornar 409 ao usar e-mail de outro usuário', async () => {
   const app = construirApp({
     logger: false,
   });
@@ -1022,7 +1018,7 @@ test('PUT /usuarios/:id deve retornar 409 ao usar e-mail de outro usuário', asy
 
   const resposta = await app.inject({
     method: 'PUT',
-    url: `/usuarios/${usuario1.id}`,
+    url: `/api/usuarios/${usuario1.id}`,
     headers: {
       authorization: `Bearer ${token}`,
     },
