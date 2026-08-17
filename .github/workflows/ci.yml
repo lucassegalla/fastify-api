@@ -119,7 +119,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image
-        run: docker build --target production -t fastify-api-basics ./backend
+        run: docker build --target production -f backend/Dockerfile -t fastify-api-basics .
 
       - name: Tag Docker image
         run: docker tag fastify-api-basics:latest 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api-basics:latest
