@@ -9,11 +9,10 @@ on:
       - main
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
-  test:
+  backend:
     runs-on: ubuntu-latest
 
     services:
@@ -41,6 +40,10 @@ jobs:
       JWT_SECRET: chave_secreta_teste
       DB_SSL: false
 
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -50,20 +53,56 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: npm ci
 
       - name: Run database migrations
         run: npm run migrate
 
-      - name: Run tests
+      - name: Run backend tests
         run: npm test
 
-  deploy-aws:
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  frontend:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Run frontend lint
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
+  deploy-aws:
+    needs:
+      - backend
+      - frontend
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -79,7 +118,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image
-        run: docker build -t fastify-api-basics .
+        run: docker build --target production -t fastify-api-basics ./backend
 
       - name: Tag Docker image
         run: docker tag fastify-api-basics:latest 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api-basics:latest

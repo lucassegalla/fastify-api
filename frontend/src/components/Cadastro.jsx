@@ -2,17 +2,19 @@ import { useState } from 'react';
 import { criarUsuario } from '../services/usuariosService';
 import { login } from '../services/autenticacaoService';
 
-function Cadastro({ setToken }) {
+function Cadastro({ setToken, irParaLogin }) {
   const [nome, setNome] = useState('');
   const [idade, setIdade] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
   async function cadastrar(event) {
     event.preventDefault();
 
     setErro('');
+    setCarregando(true);
 
     try {
       await criarUsuario({
@@ -28,43 +30,109 @@ function Cadastro({ setToken }) {
       setToken(data.token);
     } catch (error) {
       setErro(error.message);
+    } finally {
+      setCarregando(false);
     }
   }
 
   return (
-    <form onSubmit={cadastrar}>
-      <input
-        type="text"
-        placeholder="Nome"
-        value={nome}
-        onChange={(event) => setNome(event.target.value)}
-      />
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <span className="auth-label">CADASTRO</span>
 
-      <input
-        type="number"
-        placeholder="Idade"
-        value={idade}
-        onChange={(event) => setIdade(event.target.value)}
-      />
+          <h2>Crie sua conta</h2>
 
-      <input
-        type="email"
-        placeholder="E-mail"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-      />
+          <p>Preencha seus dados para começar.</p>
+        </div>
 
-      <input
-        type="password"
-        placeholder="Senha"
-        value={senha}
-        onChange={(event) => setSenha(event.target.value)}
-      />
+        <div className="demo-notice">
+          <strong>Ambiente de demonstração</strong>
 
-      <button type="submit">Cadastrar</button>
+          <p>
+            Use um e-mail fictício. Esta aplicação é apenas uma demonstração e
+            não requer dados reais.
+          </p>
+        </div>
 
-      {erro && <p>{erro}</p>}
-    </form>
+        <form onSubmit={cadastrar} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="nome">Nome</label>
+
+            <input
+              id="nome"
+              type="text"
+              placeholder="Seu nome"
+              value={nome}
+              onChange={(event) => setNome(event.target.value)}
+              disabled={carregando}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="idade">Idade</label>
+
+            <input
+              id="idade"
+              type="number"
+              placeholder="Sua idade"
+              value={idade}
+              onChange={(event) => setIdade(event.target.value)}
+              disabled={carregando}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">E-mail</label>
+
+            <input
+              id="email"
+              type="email"
+              placeholder="exemplo@email.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              disabled={carregando}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="senha">Senha</label>
+
+            <input
+              id="senha"
+              type="password"
+              placeholder="••••••••"
+              value={senha}
+              onChange={(event) => setSenha(event.target.value)}
+              disabled={carregando}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="button-primary"
+            disabled={carregando}
+          >
+            {carregando ? 'Criando conta...' : 'Criar conta'}
+          </button>
+
+          {erro && <p className="form-error">{erro}</p>}
+        </form>
+
+        <div className="auth-footer">
+          <span>Já possui uma conta?</span>
+
+          <button
+            type="button"
+            className="button-link"
+            onClick={irParaLogin}
+            disabled={carregando}
+          >
+            Entrar
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

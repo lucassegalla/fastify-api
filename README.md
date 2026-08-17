@@ -1,10 +1,10 @@
 # Fastify API Basics
 
-API REST desenvolvida com Node.js, Fastify e PostgreSQL com foco em aprendizado e aplicação de conceitos de desenvolvimento backend como organização em camadas, segurança, testes, containerização e deploy em cloud
+Aplicação web desenvolvida com Node.js, Fastify, PostgreSQL e React com foco em aprendizado e aplicação de conceitos como organização em camadas, segurança, testes, containerização, CI/CD e deploy em cloud
 
 ## Objetivo
 
-O projeto começou como uma API CRUD simples para estudar Node.js e Fastify e foi evoluindo conforme novos conceitos foram sendo adicionados, com o tempo foram implementados autenticação e autorização, testes de integração, documentação com Swagger, migrations, Docker, CI/CD e deploy em cloud utilizando Render e AWS, a ideia é continuar evoluindo o projeto e utilizar o repositório como uma referência prática
+O projeto começou como uma API CRUD simples para estudar Node.js e Fastify e foi evoluindo conforme novos conceitos foram sendo adicionados, com o tempo foram implementados autenticação e autorização, testes de integração, documentação com Swagger, migrations, Docker, CI/CD, frontend e deploy em cloud utilizando Render e AWS, a ideia é utilizar o repositório como uma referência prática dos conceitos estudados durante o desenvolvimento
 
 ## Tecnologias utilizadas
 
@@ -21,11 +21,17 @@ O projeto começou como uma API CRUD simples para estudar Node.js e Fastify e fo
 - **OpenAPI / Swagger** - Documentação da API
 - **node:test** - Testes automatizados de integração
 
+### Frontend
+
+- **React** - Construção da interface da aplicação
+- **Vite** - Ambiente de desenvolvimento e build do frontend
+- **CSS** - Estilização da interface
+
 ### Containers e CI/CD
 
 - **Docker** - Containerização da aplicação
-- **Docker Compose** - Ambiente local e banco isolado para testes
-- **GitHub Actions** - Automação dos testes e deploys
+- **Docker Compose** - Execução da API e PostgreSQL em containers
+- **GitHub Actions** - Automação dos testes, build e deploys
 
 ### Cloud
 
@@ -45,20 +51,24 @@ O projeto começou como uma API CRUD simples para estudar Node.js e Fastify e fo
 A aplicação utiliza uma arquitetura em camadas para manter cada parte do código com uma responsabilidade definida
 
 ```text
-Cliente
-    ↓
+Frontend
+   ↓
 Fastify
-    ↓
+   ↓
 Routes
-    ↓
+   ↓
 Controllers
-    ↓
+   ↓
 Services
-    ↓
+   ↓
 Repositories
-    ↓
+   ↓
 PostgreSQL
 ```
+
+### Frontend
+
+Responsável pela interface da aplicação e pela comunicação com a API
 
 ### Fastify
 
@@ -90,31 +100,39 @@ Definem as validações de entrada e saída utilizando JSON Schema e também sã
 .
 ├── .github/
 │   └── workflows/
-│       └── ci.yml      # Pipeline de CI/CD
-├── config/             # Configurações da aplicação
-├── controllers/        # Tratamento das requisições HTTP
-├── database/
-│   ├── migrations/     # Migrations do banco de dados
-│   ├── connection.js   # Conexão com PostgreSQL
-│   └── migrate.js      # Executor das migrations
-├── errors/             # Erros personalizados
-├── middlewares/        # Autenticação e autorização
-├── repositories/       # Consultas ao banco de dados
-├── routes/             # Rotas da API
-├── schemas/            # Validação e documentação das rotas
-├── services/           # Regras de negócio
-├── tests/
-│   ├── helpers/        # Utilitários utilizados nos testes
-│   └── integration/    # Testes de integração
-├── .dockerignore       # Arquivos ignorados durante o build da imagem
-├── .gitignore          # Arquivos ignorados pelo Git
-├── Dockerfile          # Imagem Docker da aplicação
-├── docker-compose.yml  # Containers do ambiente local e testes
-├── app.js              # Configuração e criação da aplicação Fastify
-├── server.js           # Inicialização do servidor
-├── package.json        # Dependências e scripts do projeto
-├── package-lock.json   # Versões exatas das dependências
-└── README.md           # Documentação do projeto
+│       └── ci.yml              # Pipeline de CI/CD
+├── backend/
+│   ├── config/                 # Configurações da aplicação
+│   ├── controllers/            # Tratamento das requisições HTTP
+│   ├── database/
+│   │   ├── migrations/         # Migrations do banco de dados
+│   │   ├── connection.js       # Conexão com PostgreSQL
+│   │   └── migrate.js          # Executor das migrations
+│   ├── errors/                 # Erros personalizados
+│   ├── middlewares/            # Autenticação e autorização
+│   ├── repositories/           # Consultas ao banco de dados
+│   ├── routes/                 # Rotas da API
+│   ├── schemas/                # Validação e documentação das rotas
+│   ├── services/               # Regras de negócio
+│   ├── tests/
+│   │   ├── helpers/            # Utilitários utilizados nos testes
+│   │   └── integration/        # Testes de integração
+│   ├── .dockerignore           # Arquivos ignorados durante o build da imagem
+│   ├── Dockerfile              # Imagem Docker do backend
+│   ├── app.js                  # Configuração e criação da aplicação Fastify
+│   ├── server.js               # Inicialização do servidor
+│   ├── package.json            # Dependências e scripts do backend
+│   └── package-lock.json       # Versões exatas das dependências
+├── frontend/
+│   ├── src/
+│   │   ├── components/         # Componentes da interface
+│   │   ├── services/           # Comunicação com a API
+│   │   └── utils/              # Funções auxiliares
+│   ├── package.json            # Dependências e scripts do frontend
+│   └── package-lock.json       # Versões exatas das dependências
+├── .gitignore                  # Arquivos ignorados pelo Git
+├── docker-compose.yml          # API e PostgreSQL em containers
+└── README.md                   # Documentação do projeto
 ```
 
 ## Funcionalidades
@@ -122,12 +140,13 @@ Definem as validações de entrada e saída utilizando JSON Schema e também sã
 ### Usuários
 
 - Criação de usuários
-- Listagem paginada
+- Listagem paginada para administradores
 - Busca por ID
 - Atualização de dados
 - Remoção de usuários
 - Normalização do nome antes da persistência
 - Senhas armazenadas utilizando hash com bcrypt
+- Validação de e-mail duplicado
 
 ### Autenticação e autorização
 
@@ -137,11 +156,13 @@ As rotas protegidas utilizam o token para identificar o usuário autenticado
 
 Usuários comuns podem consultar, atualizar e remover a própria conta enquanto usuários com role `admin` podem realizar essas operações sobre qualquer usuário
 
+A listagem completa de usuários é permitida apenas para administradores
+
 ### Validação e erros
 
 As entradas da API são validadas utilizando JSON Schema
 
-O tratamento de erros é centralizado para manter respostas consistentes em casos como `400`, `401`, `403`, `404` e `500`
+O tratamento de erros é centralizado para manter respostas consistentes em casos como `400`, `401`, `403`, `404`, `409` e `500`
 
 ### Paginação
 
@@ -156,9 +177,15 @@ limit=10
 
 O limite máximo por página é `100`
 
+### Frontend
+
+O frontend permite realizar cadastro e login, visualizar e editar o próprio perfil e remover a própria conta
+
+Usuários administradores também possuem uma tela para listar, editar e remover outros usuários
+
 ## Como executar
 
-A aplicação pode ser executada utilizando Docker ou diretamente no ambiente local
+A API pode ser executada utilizando Docker ou diretamente no ambiente local, enquanto o frontend pode ser executado localmente utilizando Vite
 
 ### Docker
 
@@ -170,24 +197,33 @@ git clone https://github.com/lucassegalla/fastify-api-basics.git
 
 #### 2. Configurar as variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto:
+Crie um arquivo `.env` dentro da pasta `backend`:
 
 ```env
 PORT=3000
-DB_HOST=db
+
+DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=fastify_api
 DB_USER=postgres
 DB_PASSWORD=sua_senha
+
+CORS_ORIGIN=http://localhost:5173
+
 DB_SSL=false
+
 JWT_SECRET=sua_chave_secreta
 ```
 
 #### 3. Iniciar a aplicação
 
+Na raiz do projeto execute:
+
 ```bash
-docker compose up --build
+docker compose --env-file ./backend/.env up --build
 ```
+
+O Docker Compose inicia o PostgreSQL, executa as migrations pendentes e depois inicia a API
 
 A API ficará disponível em:
 
@@ -201,13 +237,7 @@ A documentação Swagger ficará disponível em:
 http://localhost:3000/docs
 ```
 
-#### 4. Executar as migrations
-
-```bash
-docker compose run --rm api npm run migrate
-```
-
-#### 5. Encerrar os containers
+#### 4. Encerrar os containers
 
 ```bash
 docker compose down
@@ -217,37 +247,80 @@ docker compose down
 
 Para executar sem Docker é necessário ter Node.js e PostgreSQL instalados no ambiente
 
-#### 1. Instalar as dependências
+#### Backend
+
+Entre na pasta do backend:
 
 ```bash
-npm install
+cd backend
 ```
 
-#### 2. Configurar as variáveis de ambiente
+Instale as dependências:
 
-Crie um arquivo `.env` na raiz do projeto:
+```bash
+npm ci
+```
+
+Crie um arquivo `.env` dentro da pasta `backend`:
 
 ```env
 PORT=3000
+
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=fastify_api
 DB_USER=postgres
 DB_PASSWORD=sua_senha
+
+CORS_ORIGIN=http://localhost:5173
+
 DB_SSL=false
+
 JWT_SECRET=sua_chave_secreta
 ```
 
-#### 3. Executar as migrations
+Execute as migrations:
 
 ```bash
 npm run migrate
 ```
 
-#### 4. Iniciar a aplicação
+Inicie a API:
 
 ```bash
 npm start
+```
+
+#### Frontend
+
+Em outro terminal entre na pasta do frontend:
+
+```bash
+cd frontend
+```
+
+Instale as dependências:
+
+```bash
+npm ci
+```
+
+Crie um arquivo `.env` dentro da pasta `frontend`:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+Inicie o frontend:
+
+```bash
+npm run dev
+```
+
+O frontend ficará disponível em:
+
+```text
+http://localhost:5173
 ```
 
 A API ficará disponível em:
@@ -264,29 +337,34 @@ http://localhost:3000/docs
 
 ## Migrations
 
-As alterações na estrutura do banco ficam em `database/migrations/` e são executadas pelo script `database/migrate.js`
+As alterações na estrutura do banco ficam em `backend/database/migrations/` e são executadas pelo script `backend/database/migrate.js`
 
-Atualmente o projeto possui a migration:
+Atualmente o projeto possui as migrations:
 
 ```text
 001-create-usuarios.sql
+002-add-usuarios-constraints.sql
 ```
+
+A primeira migration cria a tabela de usuários e a segunda adiciona validações para idade e role diretamente no banco
 
 O banco mantém uma tabela chamada `_migrations` para registrar quais migrations já foram aplicadas, dessa forma o sistema consegue identificar e executar apenas as migrations pendentes
 
 Cada migration é executada dentro de uma transação e caso alguma etapa falhe é realizado um `ROLLBACK`, evitando que alterações incompletas sejam aplicadas ao banco
 
-Para executar localmente:
+Para executar localmente, dentro da pasta `backend`:
 
 ```bash
 npm run migrate
 ```
 
-Com Docker:
+Para executar no banco de testes:
 
 ```bash
-docker compose run --rm api npm run migrate
+npm run migrate:test
 ```
+
+Com Docker as migrations são executadas automaticamente antes da API ser iniciada
 
 No ambiente AWS o mesmo sistema faz parte do processo de deploy, antes de uma nova versão da aplicação ser implantada uma task temporária do ECS executa as migrations pendentes
 
@@ -294,33 +372,32 @@ No ambiente AWS o mesmo sistema faz parte do processo de deploy, antes de uma no
 
 Os testes de integração utilizam o módulo nativo `node:test` junto com `fastify.inject()`, permitindo testar as rotas da API sem precisar iniciar um servidor HTTP separado
 
-Atualmente o projeto possui 24 testes de integração cobrindo operações CRUD, paginação, autenticação, autorização e diferentes cenários de erro
+Atualmente o projeto possui 30 testes de integração cobrindo operações CRUD, paginação, autenticação, autorização, permissões de administrador e diferentes cenários de erro
 
 Os testes utilizam um banco PostgreSQL separado para manter o ambiente de testes isolado do banco utilizado durante o desenvolvimento
 
-### Executar com Docker
-
-Para executar os testes utilizando Docker:
-
-```bash
-docker compose run --rm test
-```
-
-O Docker Compose inicia o PostgreSQL de testes, aguarda o banco ficar disponível e executa a suíte em um container separado
-
-### Executar localmente
-
-Para executar os testes sem Docker crie um arquivo `.env.test` na raiz do projeto:
+Para executar os testes localmente crie um arquivo `.env.test` dentro da pasta `backend`:
 
 ```env
 PORT=3000
+
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=fastify_api_test
 DB_USER=postgres
 DB_PASSWORD=sua_senha
+
+CORS_ORIGIN=http://localhost:5173
+
 DB_SSL=false
+
 JWT_SECRET=sua_chave_secreta_de_teste
+```
+
+Execute as migrations do banco de testes:
+
+```bash
+npm run migrate:test
 ```
 
 Depois execute:
@@ -331,23 +408,27 @@ npm test
 
 ## CI/CD
 
-O projeto utiliza GitHub Actions para automatizar os testes e o processo de deploy
+O projeto utiliza GitHub Actions para automatizar os testes, validações do frontend e o processo de deploy
 
-Em pushes e pull requests para a branch `main` o workflow prepara um ambiente com Node.js e PostgreSQL, instala as dependências e executa os testes de integração
+Em pushes e pull requests para a branch `main` o workflow prepara o ambiente do backend com Node.js e PostgreSQL, executa as migrations e roda os testes de integração
 
-Quando ocorre um push para a `main` e todos os testes passam o workflow inicia o deploy na AWS
+O frontend também é validado através do lint e do build de produção
+
+Quando ocorre um push para a `main` e todas as etapas passam o workflow inicia o deploy na AWS
 
 A autenticação com a AWS é feita utilizando OIDC, permitindo que o GitHub Actions assuma uma IAM Role e receba credenciais temporárias através do AWS STS sem precisar armazenar Access Keys no repositório
 
-Caso os testes ou a task responsável pelas migrations falhem o processo é interrompido e a nova versão da aplicação não é implantada
+Durante o deploy uma nova imagem Docker é criada e enviada para o Amazon ECR, depois uma task temporária do ECS executa as migrations pendentes antes da nova versão da aplicação ser implantada
+
+Caso os testes, o build do frontend ou a task responsável pelas migrations falhem o processo é interrompido e a nova versão da aplicação não é implantada
 
 ## Deploy
 
-O projeto possui ambientes publicados no Render e na AWS
+A API possui ambientes publicados no Render e na AWS
 
 ### Render
 
-A aplicação está publicada no Render utilizando Docker e um banco PostgreSQL gerenciado pela plataforma
+A API está publicada no Render utilizando Docker e um banco PostgreSQL gerenciado pela plataforma
 
 API:
 
@@ -365,7 +446,7 @@ O deploy no Render é integrado ao repositório e ocorre após os checks configu
 
 ### AWS
 
-O ambiente principal da aplicação utiliza serviços da AWS para separar as responsabilidades da infraestrutura
+A aplicação também possui um ambiente na AWS utilizando diferentes serviços para separar as responsabilidades da infraestrutura
 
 API:
 
@@ -438,8 +519,8 @@ https://api.segalla.dev/docs
 | `GET`    | `/`             |     Não      | `200`  | Verifica se a API está em execução          |
 | `POST`   | `/login`        |     Não      | `200`  | Autentica um usuário e retorna um token JWT |
 | `POST`   | `/usuarios`     |     Não      | `201`  | Cria um novo usuário                        |
-| `GET`    | `/usuarios`     |     JWT      | `200`  | Lista os usuários cadastrados               |
-| `GET`    | `/usuarios/:id` |     JWT      | `200`  | Busca um usuário pelo ID                    |
+| `GET`    | `/usuarios`     | JWT + Admin  | `200`  | Lista os usuários cadastrados               |
+| `GET`    | `/usuarios/:id` |     JWT      | `200`  | Busca os dados de um usuário                |
 | `PUT`    | `/usuarios/:id` |     JWT      | `200`  | Atualiza os dados de um usuário             |
 | `DELETE` | `/usuarios/:id` |     JWT      | `204`  | Remove um usuário                           |
 
@@ -460,10 +541,7 @@ https://api.segalla.dev/docs
 - [x] Deploy na AWS com ECR, ECS, Fargate e RDS
 - [x] Deploy automatizado na AWS
 - [x] Application Load Balancer, domínio personalizado e HTTPS
-
-### Próximos passos
-
-- [ ] Frontend para demonstração
+- [x] Frontend para demonstração
 
 ## Autor
 

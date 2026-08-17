@@ -1,3 +1,14 @@
-node_modules/
-.env
-.env.test
+backend/node_modules/
+frontend/node_modules/
+
+backend/.env
+backend/.env.test
+backend/.env.local
+
+frontend/.env
+frontend/.env.local
+frontend/dist/
+
+coverage/
+
+*.log

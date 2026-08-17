@@ -71,12 +71,15 @@ async function atualizarUsuario(token, id, usuario) {
   return data;
 }
 
-async function listarUsuarios(token) {
-  const response = await fetch(`${API_URL}/usuarios`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
+async function listarUsuarios(token, page = 1, limit = 10) {
+  const response = await fetch(
+    `${API_URL}/usuarios?page=${page}&limit=${limit}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
 
   const data = await response.json();
 
@@ -93,4 +96,31 @@ async function listarUsuarios(token) {
   return data;
 }
 
-export { criarUsuario, buscarUsuarioPorId, atualizarUsuario, listarUsuarios };
+async function removerUsuario(token, id) {
+  const response = await fetch(`${API_URL}/usuarios/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+
+    const error = new Error(
+      data.mensagem || data.message || 'Erro ao remover usuário.',
+    );
+
+    error.status = response.status;
+
+    throw error;
+  }
+}
+
+export {
+  criarUsuario,
+  buscarUsuarioPorId,
+  atualizarUsuario,
+  listarUsuarios,
+  removerUsuario,
+};

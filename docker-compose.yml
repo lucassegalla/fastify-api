@@ -1,14 +1,4 @@
 services:
-  api:
-    build: .
-    ports:
-      - '3000:3000'
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-
   db:
     image: postgres:18
     environment:
@@ -17,37 +7,38 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql
-      - ./database/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
       interval: 5s
       timeout: 5s
       retries: 5
 
-  db_test:
-    image: postgres:18
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: fastify_api_test
-    volumes:
-      - ./database/init:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d fastify_api_test']
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  test:
-    build: .
+  migrate:
+    build:
+      context: ./backend
+      target: production
     env_file:
-      - .env.test
+      - ./backend/.env
     environment:
-      DB_HOST: db_test
+      DB_HOST: db
     depends_on:
-      db_test:
+      db:
         condition: service_healthy
-    command: npm test
+    command: npm run migrate
+
+  api:
+    build:
+      context: ./backend
+      target: production
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:
