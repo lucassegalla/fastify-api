@@ -15,7 +15,8 @@ services:
 
   migrate:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
       target: production
     env_file:
       - ./backend/.env
@@ -28,7 +29,8 @@ services:
 
   api:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
       target: production
     ports:
       - '3000:3000'

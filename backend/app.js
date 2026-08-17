@@ -1,6 +1,8 @@
 const configurarSwagger = require('./config/swagger');
 const jwt = require('@fastify/jwt');
 const cors = require('@fastify/cors');
+const path = require('node:path');
+const fastifyStatic = require('@fastify/static');
 
 require('dotenv').config({
   path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
@@ -69,9 +71,11 @@ function construirApp(options = {}) {
     return { mensagem: 'API funcionando' };
   });
 
-  fastify.get('/', async () => {
-    return { mensagem: 'API funcionando' };
-  });
+  if (process.env.NODE_ENV === 'production') {
+    fastify.register(fastifyStatic, {
+      root: path.join(__dirname, 'public'),
+    });
+  }
 
   return fastify;
 }
