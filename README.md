@@ -2,9 +2,37 @@
 
 Aplicação web desenvolvida com Node.js, Fastify, PostgreSQL e React com foco em aprendizado e aplicação de conceitos como organização em camadas, segurança, testes, containerização, CI/CD e deploy em cloud
 
+## Sumário
+
+- [Objetivo](#objetivo)
+- [Demonstração](#demonstração)
+- [Tecnologias utilizadas](#tecnologias-utilizadas)
+- [Arquitetura](#arquitetura)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Funcionalidades](#funcionalidades)
+- [Como executar](#como-executar)
+- [Migrations](#migrations)
+- [Testes automatizados](#testes-automatizados)
+- [CI/CD](#cicd)
+- [Deploy](#deploy)
+- [Documentação da API](#documentação-da-api)
+- [Endpoints](#endpoints)
+- [Roadmap](#roadmap)
+- [Autor](#autor)
+
 ## Objetivo
 
 O projeto começou como uma API CRUD simples para estudar Node.js e Fastify e foi evoluindo conforme novos conceitos foram sendo adicionados, com o tempo foram implementados autenticação e autorização, testes de integração, documentação com Swagger, migrations, Docker, CI/CD, frontend e deploy em cloud utilizando Render e AWS, a ideia é utilizar o repositório como uma referência prática dos conceitos estudados durante o desenvolvimento
+
+## Demonstração
+
+### Frontend
+
+![Frontend da aplicação](docs/images/frontend.png)
+
+### Swagger
+
+![Documentação Swagger](docs/images/swagger.png)
 
 ## Tecnologias utilizadas
 
