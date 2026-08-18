@@ -130,6 +130,8 @@ Definem as validações de entrada e saída utilizando JSON Schema e também sã
 ├── .github/
 │   └── workflows/
 │       └── ci.yml        # Pipeline de CI/CD
+├── docs/
+│   └── images/
 ├── backend/
 │   ├── config/           # Configurações da aplicação
 │   ├── controllers/      # Tratamento das requisições HTTP
@@ -459,9 +461,9 @@ O projeto possui ambientes publicados no Render e na AWS
 
 ### Render
 
-A API está publicada no Render utilizando Docker e um banco PostgreSQL gerenciado pela plataforma
+A aplicação está publicada no Render utilizando Docker e um banco PostgreSQL gerenciado pela plataforma
 
-API:
+Aplicação:
 
 ```text
 https://fastify-api-basics.onrender.com
@@ -489,12 +491,6 @@ Documentação:
 
 ```text
 https://api.segalla.dev/docs
-```
-
-API:
-
-```text
-https://api.segalla.dev/api
 ```
 
 A imagem Docker é armazenada no Amazon ECR e executada pelo Amazon ECS utilizando AWS Fargate, enquanto o banco PostgreSQL é executado pelo Amazon RDS
