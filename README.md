@@ -2,6 +2,8 @@
 
 Aplicação web desenvolvida com Node.js, Fastify, PostgreSQL e React com foco em aprendizado e aplicação de conceitos como organização em camadas, segurança, testes, containerização, CI/CD e deploy em cloud
 
+**Aviso**: O ambiente da aplicação na AWS foi desativado, a seção sobre AWS continua na documentação como registro da arquitetura e das tecnologias utilizadas
+
 ## Sumário
 
 - [Objetivo](#objetivo)
