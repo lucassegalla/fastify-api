@@ -119,13 +119,13 @@ jobs:
   #       uses: aws-actions/amazon-ecr-login@v2
   #
   #     - name: Build Docker image
-  #       run: docker build --target production -f backend/Dockerfile -t fastify-api-basics .
+  #       run: docker build --target production -f backend/Dockerfile -t fastify-api .
   #
   #     - name: Tag Docker image
-  #       run: docker tag fastify-api-basics:latest 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api-basics:latest
+  #       run: docker tag fastify-api:latest 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api:latest
   #
   #     - name: Push Docker image to ECR
-  #       run: docker push 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api-basics:latest
+  #       run: docker push 952846578181.dkr.ecr.us-east-1.amazonaws.com/fastify-api:latest
   #
   #     - name: Run database migrations
   #       id: run-migrations

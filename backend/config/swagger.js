@@ -6,7 +6,7 @@ async function configurarSwagger(fastify) {
   await fastify.register(swagger, {
     openapi: {
       info: {
-        title: 'Fastify API Basics',
+        title: 'Fastify API',
         description:
           'API REST desenvolvida com Node.js, Fastify e PostgreSQL, com autenticação JWT, autorização por perfil e operações CRUD de usuários.',
         version: '1.0.0',

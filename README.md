@@ -1,4 +1,4 @@
-# Fastify API Basics
+# Fastify API
 
 Aplicação web desenvolvida com Node.js, Fastify, PostgreSQL e React com foco em aprendizado e aplicação de conceitos como organização em camadas, segurança, testes, containerização, CI/CD e deploy em cloud
 
@@ -227,7 +227,7 @@ A aplicação pode ser executada utilizando Docker ou diretamente no ambiente lo
 #### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/lucassegalla/fastify-api-basics.git
+git clone https://github.com/lucassegalla/fastify-api.git
 ```
 
 #### 2. Configurar as variáveis de ambiente
